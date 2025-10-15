@@ -1,0 +1,60 @@
+.consultation-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.consultation-container h2 {
+  margin-bottom: 6px;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.consultation-container p {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.consultation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.consultation-form input,
+.consultation-form textarea,
+.consultation-form select {
+  padding: 6px;
+  font-size: 0.85rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.consultation-form label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.consultation-form button {
+  margin-top: 12px;
+  padding: 8px;
+  font-size: 0.9rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.consultation-form button:hover {
+  background-color: #0056b3;
+}

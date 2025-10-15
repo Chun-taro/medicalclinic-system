@@ -1,0 +1,24 @@
+.inventory-container {
+  padding: 20px;
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.inventory-table th,
+.inventory-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.inventory-table th {
+  background-color: #f4f4f4;
+}
+
+.inventory-table tr:nth-child(even) {
+  background-color: #fafafa;
+}

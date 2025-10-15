@@ -1,0 +1,47 @@
+.doctor-form-container {
+  max-width: 500px;
+  margin: auto;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.doctor-form-container h2 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.doctor-form-container p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.doctor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doctor-form input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.schedule-button {
+  background-color: #e53935;
+  color: white;
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.schedule-button:hover {
+  background-color: #c62828;
+}

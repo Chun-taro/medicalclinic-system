@@ -18,10 +18,8 @@ router.post('/', async (req, res) => {
     const { name, quantityInStock, boxesInStock, capsulesPerBox, unit, expiryDate } = req.body;
 
     const expiry = new Date(expiryDate);
-    const startOfDay = new Date(expiry);
-    startOfDay.setUTCHours(0, 0, 0, 0);
-    const endOfDay = new Date(expiry);
-    endOfDay.setUTCHours(23, 59, 59, 999);
+    const startOfDay = new Date(expiry); startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(expiry); endOfDay.setUTCHours(23, 59, 59, 999);
 
     const existing = await Medicine.findOne({
       name,
@@ -38,12 +36,12 @@ router.post('/', async (req, res) => {
 
     const newMedicine = new Medicine({
       name,
-      quantityInStock,
-      boxesInStock,
-      capsulesPerBox,
+      quantityInStock: parseInt(quantityInStock),
+      boxesInStock: parseInt(boxesInStock),
+      capsulesPerBox: parseInt(capsulesPerBox),
       unit,
       expiryDate: expiry,
-      available: quantityInStock > 0 || boxesInStock > 0
+      available: parseInt(quantityInStock) > 0 || parseInt(boxesInStock) > 0
     });
 
     await newMedicine.save();
@@ -81,13 +79,23 @@ router.post('/dispense', async (req, res) => {
 // POST deduct multiple medicines
 router.post('/deduct', async (req, res) => {
   try {
-    const { prescribed } = req.body; // array of { medicineId, quantity }
+    const { prescribed } = req.body;
+
+    if (!Array.isArray(prescribed)) {
+      return res.status(400).json({ error: 'Invalid prescribed list' });
+    }
 
     for (const item of prescribed) {
       const med = await Medicine.findById(item.medicineId);
       if (!med) continue;
 
-      while (med.quantityInStock < item.quantity) {
+      const qty = parseInt(item.quantity);
+      if (!qty || qty <= 0) {
+        console.warn(`Invalid quantity for ${med.name}:`, item.quantity);
+        continue;
+      }
+
+      while (med.quantityInStock < qty) {
         if (med.boxesInStock > 0) {
           med.boxesInStock -= 1;
           med.quantityInStock += med.capsulesPerBox;
@@ -96,13 +104,14 @@ router.post('/deduct', async (req, res) => {
         }
       }
 
-      med.quantityInStock -= item.quantity;
+      med.quantityInStock -= qty;
       med.available = med.quantityInStock > 0 || med.boxesInStock > 0;
       await med.save();
     }
 
     res.json({ success: true });
   } catch (err) {
+    console.error('Deduction error:', err);
     res.status(500).json({ error: err.message });
   }
 });

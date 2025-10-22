@@ -67,14 +67,22 @@ export default function Reports() {
   }, [expandedId]);
 
   const formatDateTime = (date) => {
-    try {
-      return date
-        ? new Date(date).toLocaleString('en-US', { timeZone: 'Asia/Manila' })
-        : '—';
-    } catch {
-      return '—';
-    }
-  };
+  try {
+    return date
+      ? new Date(date).toLocaleString('en-US', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        })
+      : '—';
+  } catch {
+    return '—';
+  }
+};
 
   const currentTime = useRealTime();
 
@@ -109,41 +117,41 @@ export default function Reports() {
                     onClick={() => toggleExpand(c._id)}
                   >
                     <p><strong>{c.firstName} {c.lastName}</strong></p>
-                    <p><strong>Date:</strong> {formatDateTime(c.consultationCompletedAt || c.appointmentDate)}</p>
+                    <p><strong>Date:</strong> {formatDateTime(c.appointmentDate)}</p>
                     <p>{c.diagnosis}</p>
                   </div>
                 ))}
               </div>
 
               <div className="consultation-details">
-                {(() => {
-                  const selected = consultations.find(c => c._id === expandedId);
-                  if (!selected) return null;
+  {(() => {
+    const selected = consultations.find(c => c._id === expandedId);
+    if (!selected) return null;
 
-                  console.log(selected.consultationCompletedAt);
+    return (
+      <div key={`expanded-${selected._id}`}>
+        <h4>{selected.firstName} {selected.lastName}</h4>
+        <p><strong>Diagnosis:</strong> {selected.diagnosis}</p>
+        <p><strong>Management:</strong> {selected.management}</p>
+        <p><strong>Chief Complaint:</strong> {selected.chiefComplaint}</p>
+        <p><strong>Prescribed Medicines:</strong></p>
+        <ul>
+          {Array.isArray(selected.medicinesPrescribed)
+            ? selected.medicinesPrescribed.map((med, idx) => (
+                <li key={idx}>{med.name} x{med.quantity}</li>
+              ))
+            : <li>{selected.medicinesPrescribed || '—'}</li>}
+        </ul>
+        <p><strong>Vitals:</strong> BP: {selected.bloodPressure}, Temp: {selected.temperature}, HR: {selected.heartRate}, O₂: {selected.oxygenSaturation}, BMI: {selected.bmi}</p>
+        <p><strong>Referred:</strong> {selected.referredToPhysician ? `Yes (${selected.physicianName || '—'})` : 'No'}</p>
+        <p><strong>First Aid:</strong> {selected.firstAidDone === 'y' ? 'Yes' : 'No'} ({selected.firstAidWithin30Mins})</p>
+       
+  <p><strong>Completed At:</strong> {formatDateTime(selected.consultationCompletedAt || selected.appointmentDate)}</p>
 
-                  return (
-                    <div key={`expanded-${selected._id}`}>
-                      <h4>{selected.firstName} {selected.lastName}</h4>
-                      <p><strong>Completed At:</strong> {formatDateTime(selected.consultationCompletedAt)}</p>
-                      <p><strong>Diagnosis:</strong> {selected.diagnosis}</p>
-                      <p><strong>Management:</strong> {selected.management}</p>
-                      <p><strong>Chief Complaint:</strong> {selected.chiefComplaint}</p>
-                      <p><strong>Prescribed Medicines:</strong></p>
-                      <ul>
-                        {Array.isArray(selected.medicinesPrescribed)
-                          ? selected.medicinesPrescribed.map((med, idx) => (
-                              <li key={idx}>{med.name} x{med.quantity}</li>
-                            ))
-                          : <li>{selected.medicinesPrescribed || '—'}</li>}
-                      </ul>
-                      <p><strong>Vitals:</strong> BP: {selected.bloodPressure}, Temp: {selected.temperature}, HR: {selected.heartRate}, O₂: {selected.oxygenSaturation}, BMI: {selected.bmi}</p>
-                      <p><strong>Referred:</strong> {selected.referredToPhysician ? `Yes (${selected.physicianName || '—'})` : 'No'}</p>
-                      <p><strong>First Aid:</strong> {selected.firstAidDone === 'y' ? 'Yes' : 'No'} ({selected.firstAidWithin30Mins})</p>
-                    </div>
-                  );
-                })()}
-              </div>
+      </div>
+    );
+  })()}
+</div>
             </div>
 
             <p>Current time: {currentTime.toLocaleString()}</p>

@@ -4,11 +4,15 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
 
-  if (!token) {
+  // Check if token exists and is not empty
+  if (!token || token.trim() === '') {
+    console.log('No token found, redirecting to login');
     return <Navigate to="/" replace />;
   }
 
-  if (requiredRole && role !== requiredRole) {
+  // Check if role exists and matches required role
+  if (requiredRole && (!role || role !== requiredRole)) {
+    console.log(`Role mismatch: expected ${requiredRole}, got ${role}`);
     return <Navigate to="/" replace />;
   }
 

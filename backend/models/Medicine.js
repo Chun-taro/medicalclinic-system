@@ -5,14 +5,14 @@ const medicineSchema = new mongoose.Schema({
   genericName: String,
   brandName: String,
   description: String,
-  dosageForm: String,     // e.g., tablet, syrup, capsule
-  strength: String,       // e.g., 500mg, 5ml
+  dosageForm: String,
+  strength: String,
 
-  quantityInStock: { type: Number, default: 0 }, // capsules available
-  boxesInStock: { type: Number, default: 0 },    // unopened boxes
-  capsulesPerBox: { type: Number, default: 0 },  // capsules per box
+  quantityInStock: { type: Number, default: 0 },
+  boxesInStock: { type: Number, default: 0 },
+  capsulesPerBox: { type: Number, default: 0 },
 
-  unit: String,           // e.g., pcs, bottles, strips
+  unit: String,
   expiryDate: Date,
   available: { type: Boolean, default: true },
   addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }

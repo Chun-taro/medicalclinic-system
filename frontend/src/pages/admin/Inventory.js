@@ -14,6 +14,8 @@ export default function Inventory() {
     unit: '',
     expiryDate: ''
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchInventory = async () => {
     try {
@@ -24,6 +26,7 @@ export default function Inventory() {
       setMedicines(res.data);
     } catch (err) {
       console.error('Error fetching inventory:', err.message);
+      setError('Failed to load inventory.');
     } finally {
       setLoading(false);
     }
@@ -39,11 +42,22 @@ export default function Inventory() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setSubmitting(true);
+    setError('');
+
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/medicines', form, {
+      const payload = {
+        ...form,
+        quantityInStock: parseInt(form.quantityInStock),
+        boxesInStock: parseInt(form.boxesInStock),
+        capsulesPerBox: parseInt(form.capsulesPerBox)
+      };
+
+      await axios.post('http://localhost:5000/api/medicines', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
       setForm({
         name: '',
         quantityInStock: '',
@@ -52,9 +66,13 @@ export default function Inventory() {
         unit: '',
         expiryDate: ''
       });
+
       fetchInventory();
     } catch (err) {
       console.error('Error adding medicine:', err.message);
+      setError('Failed to add medicine.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -71,8 +89,12 @@ export default function Inventory() {
           <input type="number" name="capsulesPerBox" placeholder="Capsules per Box" value={form.capsulesPerBox} onChange={handleChange} required />
           <input type="text" name="unit" placeholder="Unit (e.g. pcs, bottles)" value={form.unit} onChange={handleChange} required />
           <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange} />
-          <button type="submit">Add Medicine</button>
+          <button type="submit" disabled={submitting}>
+            {submitting ? 'Adding...' : 'Add Medicine'}
+          </button>
         </form>
+
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
         {loading ? (
           <p>Loading inventory...</p>

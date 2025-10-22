@@ -1,64 +1,142 @@
-s
+/* Base layout */
 .dashboard-container {
   display: flex;
-  height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
+/* Sidebar default (mobile) */
 .sidebar {
-  width: 220px;
-  background-color: #1e293b;
-  color: white;
-  padding: 20px;
-}
-
-.sidebar h3 {
-  margin-bottom: 20px;
-  font-size: 18px;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  margin: 15px 0;
-  cursor: pointer;
-}
-
-.sidebar li:hover {
-  text-decoration: underline;
-}
-
-.logout-button {
-  margin-top: 30px;
-  padding: 10px;
   width: 100%;
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
+  background: linear-gradient(to bottom, #0077cc, #005fa3);
+  color: #fff;
+  padding: 1.5rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 2;
 }
 
-.logout-button:hover {
-  background-color: #dc2626;
+/* Sidebar desktop */
+@media (min-width: 768px) {
+  .dashboard-container {
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 240px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+  }
 }
 
+/* Main content */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
+/* Navbar */
 .navbar {
-  background-color: #f1f5f9;
-  padding: 15px 20px;
-  border-bottom: 1px solid #ccc;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
+/* Page content */
 .page-content {
-  padding: 20px;
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background-color: #fefefe;
+}
+
+/* Table container */
+.table-container {
+  overflow-x: auto;
+}
+
+/* Responsive tweaks */
+@media (max-width: 767px) {
+  .sidebar {
+    padding: 1rem;
+  }
+
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .page-content {
+    padding: 1rem 0.75rem;
+  }
+
+  .appointment-table th,
+  .appointment-table td {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+}
+/* Appointment table styling */
+.appointment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  table-layout: auto;
+}
+
+/* Table headers */
+.appointment-table th {
+  background-color: #0077cc;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+/* Table cells */
+.appointment-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Zebra striping */
+.appointment-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Hover effect */
+.appointment-table tr:hover {
+  background-color: #f0f8ff;
+}
+
+/* Responsive tweaks */
+@media (max-width: 767px) {
+  .appointment-table {
+    font-size: 0.85rem;
+  }
+
+  .appointment-table th,
+  .appointment-table td {
+    padding: 0.5rem;
+  }
 }

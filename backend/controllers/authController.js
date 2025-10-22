@@ -1,20 +1,48 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
-exports.signup = async (req, res) => {
+// Add reCAPTCHA verification function
+const verifyRecaptcha = async (token) => {
   try {
-    const { name, email, password, role } = req.body;
+    const response = await axios.post('https://www.google.com/recaptcha/api/siteverify', null, {
+      params: {
+        secret: process.env.RECAPTCHA_SECRET_KEY,
+        response: token
+      }
+    });
+    return response.data.success;
+  } catch (error) {
+    console.error('reCAPTCHA verification error:', error);
+    return false;
+  }
+};
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required' });
+const signup = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password, role, recaptchaToken } = req.body;
+
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+      return res.status(400).json({ error: 'reCAPTCHA verification failed' });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: 'Email already exists' });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashed, role });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      role: role || 'patient'
+    });
+
     await user.save();
 
     const token = jwt.sign(
@@ -23,32 +51,35 @@ exports.signup = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    res.status(201).json({ token, userId: user._id, role: user.role });
-  } catch (err) {
-    console.error('Signup error:', err);
-    res.status(500).json({ error: 'Server error during signup' });
+    res.json({
+      token,
+      userId: user._id,
+      role: user.role,
+      message: 'User created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    console.log('🔐 Login attempt:', email);
+    const { email, password, recaptchaToken } = req.body;
 
-    const user = await User.findOne({ email });
-    console.log('👤 User found:', !!user); // true or false
-
-    if (!user) {
-      console.log('❌ No user found with email:', email);
-      return res.status(401).json({ error: 'Invalid credentials' });
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(recaptchaToken);
+    if (!isRecaptchaValid) {
+      return res.status(400).json({ error: 'reCAPTCHA verification failed' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log('🔍 Password match:', isMatch);
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
 
-    if (!isMatch) {
-      console.log('❌ Password incorrect for:', email);
-      return res.status(401).json({ error: 'Invalid credentials' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
@@ -57,10 +88,15 @@ exports.login = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    console.log('✅ Login successful:', user.email);
-    res.json({ token, userId: user._id, role: user.role });
-  } catch (err) {
-    console.error('🔥 Login error:', err);
-    res.status(500).json({ error: 'Server error during login' });
+    res.json({
+      token,
+      userId: user._id,
+      role: user.role,
+      message: 'Login successful'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
+
+module.exports = { signup, login };

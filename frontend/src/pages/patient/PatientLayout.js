@@ -14,12 +14,12 @@ export default function PatientLayout({ children }) {
       <div className="sidebar">
         <h3>Patient Menu</h3>
         <ul>
-  <li onClick={() => navigate('/patient-dashboard')}>Dashboard</li>
-  <li onClick={() => navigate('/patient-appointments')}>My Appointments</li>
-  <li onClick={() => navigate('/patient-book')}>Book Appointment</li>
-  <li onClick={() => navigate('/patient-consultations')}>My Consultations</li> {/* ✅ Add this */}
-  <li onClick={() => navigate('/patient-profile')}>Profile</li>
-</ul>
+          <li onClick={() => navigate('/patient-dashboard')}>Dashboard</li>
+          <li onClick={() => navigate('/patient-appointments')}>My Appointments</li>
+          <li onClick={() => navigate('/patient-book')}>Book Appointment</li>
+          <li onClick={() => navigate('/patient-consultations')}>My Consultations</li>
+          <li onClick={() => navigate('/patient-profile')}>Profile</li>
+        </ul>
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
       <div className="main-content">

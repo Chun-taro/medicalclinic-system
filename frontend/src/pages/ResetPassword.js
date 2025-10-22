@@ -1,46 +1,47 @@
-import './AuthForm.css';
+import './Auth.css';
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 export default function ResetPassword() {
-  const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const navigate = useNavigate();
+  const query = new URLSearchParams(useLocation().search);
+  const email = query.get('email');
+  const token = query.get('token');
 
   const handleReset = async () => {
-    if (!email || !newPassword) {
-      alert('Please fill out both fields');
-      return;
-    }
-
+    if (!newPassword) return alert('Enter a new password');
     try {
-      await axios.post('http://localhost:5000/api/reset-password', { email, newPassword });
-      alert('Password reset successful. You can now log in.');
+      await axios.post('http://localhost:5000/api/reset/reset-password', {
+        email,
+        token,
+        newPassword
+      });
+      alert('Password reset successful');
       navigate('/');
     } catch (err) {
-      console.error('Reset failed:', err.response?.data || err.message);
       alert(err.response?.data?.error || 'Reset failed');
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Reset Password</h2>
-      <input
-        placeholder="Email"
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-      <input
-        placeholder="New Password"
-        type="password"
-        value={newPassword}
-        onChange={e => setNewPassword(e.target.value)}
-      />
-      <button onClick={handleReset}>Reset Password</button>
-      <button onClick={() => navigate('/')}>Back to Login</button>
+    <div className="auth-wrapper">
+      <div className="auth-left">
+        <div className="form-wrapper">
+          <h2>Reset Password</h2>
+          <input
+            type="password"
+            placeholder="New Password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+          />
+          <button onClick={handleReset}>Reset Password</button>
+        </div>
+      </div>
+      <div className="auth-right">
+        <img src="https://buksu.edu.ph/wp-content/uploads/2020/11/DSC_6474.jpg" alt="Background" />
+      </div>
     </div>
   );
 }

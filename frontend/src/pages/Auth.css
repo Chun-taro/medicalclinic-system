@@ -1,0 +1,133 @@
+/* Wrapper for the whole login page */
+.auth-wrapper {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Left side: login form */
+.auth-left {
+  flex: 1;
+  padding: 3rem 2rem 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f9f9f9;
+}
+
+/* Welcome message */
+.auth-left h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #0077cc;
+}
+
+/* Input fields and dropdowns */
+.auth-left input,
+.auth-left select {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Login button */
+.auth-left button {
+  padding: 0.75rem;
+  font-size: 1rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-left button:hover {
+  background-color: #005fa3;
+}
+
+/* Register link */
+.auth-left p {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.auth-left span {
+  color: #0077cc;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Right side: background image */
+.auth-right {
+  flex: 1;
+  overflow: hidden;
+}
+
+.auth-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.google-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.google-button:hover {
+  background-color: #357ae8;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .auth-wrapper {
+    flex-direction: column;
+  }
+
+  .auth-right {
+    display: none;
+  }
+
+  .auth-left {
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .auth-left input,
+  .auth-left select,
+  .auth-left button {
+    max-width: 100%;
+  }
+}
+
+.recaptcha-container {
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.recaptcha-error {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: center;
+}

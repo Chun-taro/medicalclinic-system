@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import PatientLayout from './PatientLayout';
-import './doctor-appointment.css';
+import './book-appointment.css';
 
 export default function BookAppointment() {
   const [form, setForm] = useState({

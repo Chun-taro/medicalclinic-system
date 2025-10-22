@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import PatientLayout from './PatientLayout';
-import './doctor-appointments.css'; // Reuse styling from booking form
+import './patient-appointments.css';
 
 export default function MyAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -46,7 +46,7 @@ export default function MyAppointments() {
 
   return (
     <PatientLayout>
-      <div className="doctor-form-container">
+      <div className="patient-appointments-container">
         <h2>My Appointments</h2>
         <p>Here are your scheduled appointments.</p>
 
@@ -80,7 +80,7 @@ export default function MyAppointments() {
                     <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
                     <td>{app.status}</td>
                     <td>
-                      <button onClick={() => alert(`Edit form for ${app.firstName || app.name}`)}>✏️</button>{' '}
+                      <button onClick={() => alert(`Edit form for ${app.firstName || app.name}`)}>✏️</button>
                       <button onClick={() => handleDelete(app._id)}>🗑️</button>
                     </td>
                   </tr>

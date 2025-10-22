@@ -78,19 +78,12 @@ export default function ConsultationPage() {
     }));
   };
 
-  const handleMedicineToggle = (medicineId, name) => {
-    const exists = prescribedList.find(p => p.medicineId === medicineId);
-    if (exists) {
-      setPrescribedList(prev => prev.filter(p => p.medicineId !== medicineId));
-    } else {
-      setPrescribedList(prev => [...prev, { medicineId, name, quantity: 1 }]);
-    }
-  };
-
   const handleQuantityChange = (medicineId, qty) => {
     setPrescribedList(prev =>
       prev.map(p =>
-        p.medicineId === medicineId ? { ...p, quantity: parseInt(qty) || 1 } : p
+        p.medicineId === medicineId
+          ? { ...p, quantity: parseInt(qty) || 1 }
+          : p
       )
     );
   };
@@ -98,20 +91,24 @@ export default function ConsultationPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+
     try {
-      // Complete the consultation
+      // 1. Deduct medicines from inventory
+      if (prescribedList.length > 0) {
+        await axios.post(
+          'http://localhost:5000/api/medicines/deduct',
+          { prescribed: prescribedList },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      // 2. Complete the consultation
       await axios.patch(
         `http://localhost:5000/api/appointments/${selectedAppointment._id}/consultation`,
-        { ...form, consultationCompletedAt: new Date().toISOString() },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // Log the action in the audit log
-      await axios.post(
-        'http://localhost:5000/api/audit-log',
         {
-          action: 'Completed Consultation',
-          details: `Consultation for appointment ${selectedAppointment._id} completed.`
+          ...form,
+          medicinesPrescribed: prescribedList,
+          consultationCompletedAt: new Date().toISOString()
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -123,7 +120,7 @@ export default function ConsultationPage() {
       fetchMedicines();
     } catch (err) {
       console.error('Error saving consultation:', err.message);
-      alert('Failed to save consultation');
+      alert('Failed to save consultation or deduct inventory');
     }
   };
 
@@ -191,43 +188,58 @@ export default function ConsultationPage() {
                   className="medicine-autocomplete"
                 />
                 {medicineSearch && (
-                  <ul className="autocomplete-suggestions">
-                    {filteredMedicines
-                      .filter(med => !prescribedList.some(p => p.medicineId === med._id))
-                      .slice(0, 5)
-                      .map(med => (
-                        <li
-                          key={med._id}
-                          onClick={() => {
-                            setPrescribedList(prev => [...prev, { medicineId: med._id, name: med.name, quantity: 1 }]);
-                            setMedicineSearch('');
-                          }}
-                        >
-                          {med.name} ({med.quantityInStock} caps)
-                        </li>
-                      ))}
-                  </ul>
-                )}
+  <ul className="autocomplete-suggestions">
+    {filteredMedicines
+      .filter(med => !prescribedList.some(p => p.medicineId === med._id))
+      .slice(0, 5)
+      .map(med => (
+        <li
+          key={med._id}
+          onClick={() => {
+            setPrescribedList(prev => [
+              ...prev,
+              {
+                medicineId: med._id,
+                name: med.name,
+                quantity: 1,
+                expiryDate: med.expiryDate // ✅ include expiry here
+              }
+            ]);
+            setMedicineSearch('');
+          }}
+        >
+          {med.name} ({med.quantityInStock} caps) — Exp: {med.expiryDate ? new Date(med.expiryDate).toLocaleDateString() : '—'}
+        </li>
+      ))}
+  </ul>
+)}
 
                 {prescribedList.length > 0 && (
-                  <div className="prescribed-list">
-                    {prescribedList.map(p => (
-                      <div key={p.medicineId} className="prescribed-row">
-                        <span>{p.name}</span>
-                        <input
-                          type="number"
-                          min="1"
-                          value={p.quantity}
-                          onChange={e => handleQuantityChange(p.medicineId, e.target.value)}
-                          placeholder="Qty"
-                        />
-                        <button type="button" onClick={() =>
-                          setPrescribedList(prev => prev.filter(m => m.medicineId !== p.medicineId))
-                        }>❌</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+  <div className="prescribed-list">
+    {prescribedList.map(p => (
+      <div key={p.medicineId} className="prescribed-row">
+        <span>
+          {p.name} — Exp: {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString() : '—'}
+        </span>
+        <input
+          type="number"
+          min="1"
+          value={p.quantity}
+          onChange={e => handleQuantityChange(p.medicineId, e.target.value)}
+          placeholder="Qty"
+        />
+        <button
+          type="button"
+          onClick={() =>
+            setPrescribedList(prev => prev.filter(m => m.medicineId !== p.medicineId))
+          }
+        >
+          ❌
+        </button>
+      </div>
+    ))}
+  </div>
+)}
 
                 <h4 className="section-label">📋 Referral & First Aid</h4>
                 <label>
@@ -237,9 +249,10 @@ export default function ConsultationPage() {
                 <input name="physicianName" placeholder="Physician Name" value={form.physicianName} onChange={handleChange} />
                 <label>First Aid Done</label>
                 <select name="firstAidWithin30Mins" value={form.firstAidWithin30Mins} onChange={handleChange}>
-    <option value="y">Yes</option>
-    <option value="n">No</option>
-    <option value="n/a">N/A</option>
+                  <option value="y">Yes</option>
+                  <option value="n">No</option>
+                  <option value="n/a">N/A</option>
+                
   </select>
 
   <button type="submit">✅ Save Consultation</button>

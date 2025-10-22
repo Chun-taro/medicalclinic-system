@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PatientLayout from './PatientLayout';
-
 
 export default function PatientDashboard() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      const googleId = localStorage.getItem('googleId');
 
       if (!userId || !token) {
         setError('Missing user credentials. Please log in again.');
@@ -19,22 +22,41 @@ export default function PatientDashboard() {
         return;
       }
 
+      // 🔍 Double-check role using Google ID if available
+      if (googleId) {
+        try {
+          const res = await axios.get(`http://localhost:5000/api/users/role-by-google/${googleId}`);
+          const fetchedRole = res.data.role;
+          if (fetchedRole !== 'patient') {
+            navigate('/unauthorized');
+            return;
+          }
+        } catch (err) {
+          console.error('Error validating role via Google ID:', err.response?.data || err.message);
+          navigate('/unauthorized');
+          return;
+        }
+      } else if (role !== 'patient') {
+        navigate('/unauthorized');
+        return;
+      }
+
+      // ✅ Fetch appointments
       try {
-        const res = await axios.get(`http://localhost:5000/api/appointments/${userId}`, {
+        const res = await axios.get(`http://localhost:5000/api/appointments/patient/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-
         setAppointments(res.data);
       } catch (err) {
         console.error('Error fetching appointments:', err.response?.data || err.message);
-        setError('Failed to load appointments.');
+        setError(err.response?.data?.error || 'Failed to load appointments.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAppointments();
-  }, []);
+    fetchData();
+  }, [navigate]);
 
   return (
     <PatientLayout>
@@ -48,72 +70,43 @@ export default function PatientDashboard() {
       ) : appointments.length === 0 ? (
         <p>No appointments found.</p>
       ) : (
-        <table className="appointment-table">
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Reason</th>
-              <th>Complaint</th>
-              <th>Diagnosis</th>
-              <th>Management</th>
-              <th>BP</th>
-              <th>Temp</th>
-              <th>O₂</th>
-              <th>HR</th>
-              <th>BMI</th>
-              <th>BMI Advice</th>
-              <th>Campus</th>
-              <th>Course & Year</th>
-              <th>COVID Vax</th>
-              <th>Allergies</th>
-              <th>Medications</th>
-              <th>Available</th>
-              <th>Qty</th>
-              <th>Referred</th>
-              <th>Physician</th>
-              <th>External Faculty</th>
-              <th>Time Referred</th>
-              <th>Within 1hr</th>
-              <th>First Aid</th>
-              <th>Within 30min</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((apt) => (
-              <tr key={apt._id}>
-                <td>{apt.status}</td>
-                <td>{new Date(apt.appointmentDate).toLocaleDateString()}</td>
-                <td>{apt.typeOfVisit}</td>
-                <td>{apt.reasonForVisit}</td>
-                <td>{apt.chiefComplaint}</td>
-                <td>{apt.diagnosis}</td>
-                <td>{apt.management}</td>
-                <td>{apt.bloodPressure}</td>
-                <td>{apt.temperature}</td>
-                <td>{apt.oxygenSaturation}</td>
-                <td>{apt.heartRate}</td>
-                <td>{apt.bmi}</td>
-                <td>{apt.bmiIntervention}</td>
-                <td>{apt.campus}</td>
-                <td>{apt.courseAndYear}</td>
-                <td>{apt.covidVaccinationStatus}</td>
-                <td>{apt.allergies}</td>
-                <td>{apt.medicinesPrescribed}</td>
-                <td>{apt.availableInClinic ? 'Yes' : 'No'}</td>
-                <td>{apt.quantity}</td>
-                <td>{apt.referredToPhysician ? 'Yes' : 'No'}</td>
-                <td>{apt.physicianName || '-'}</td>
-                <td>{apt.referredToExternalFaculty ? 'Yes' : 'No'}</td>
-                <td>{apt.timeReferred || '-'}</td>
-                <td>{apt.referredWithin1Hour}</td>
-                <td>{apt.firstAidDone}</td>
-                <td>{apt.firstAidWithin30Mins}</td>
+        <div className="table-container">
+          <table className="appointment-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Diagnosis</th>
+                <th>Management</th>
+                <th>Medicines</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {appointments.map((apt) => (
+                <tr key={apt._id}>
+                  <td>{apt.status}</td>
+                  <td>{new Date(apt.appointmentDate).toLocaleDateString()}</td>
+                  <td>{apt.typeOfVisit || '—'}</td>
+                  <td>{apt.reasonForVisit || '—'}</td>
+                  <td>{apt.diagnosis || '—'}</td>
+                  <td>{apt.management || '—'}</td>
+                  <td>
+                    {Array.isArray(apt.medicinesPrescribed)
+                      ? apt.medicinesPrescribed.map((med, idx) => (
+                          <span key={med._id || idx}>
+                            {med.name} ({med.quantity})
+                            {idx < apt.medicinesPrescribed.length - 1 ? ', ' : ''}
+                          </span>
+                        ))
+                      : apt.medicinesPrescribed || '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </PatientLayout>
   );

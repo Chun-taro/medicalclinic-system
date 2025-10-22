@@ -1,9 +1,9 @@
 const express = require('express');
 const Appointment = require('../models/Appointment');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const router = express.Router();
 
-// POST /api/appointments/book
+// Book appointment
 router.post('/book', auth, async (req, res) => {
   try {
     if (req.user.role !== 'patient') {
@@ -12,24 +12,17 @@ router.post('/book', auth, async (req, res) => {
 
     const appointment = new Appointment({
       patientId: req.user.userId,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      email: req.body.email,
-      phone: req.body.phone,
-      address: req.body.address,
-      purpose: req.body.purpose,
-      appointmentDate: req.body.appointmentDate
+      ...req.body
     });
 
     await appointment.save();
     res.status(201).json({ message: 'Appointment booked successfully' });
   } catch (err) {
-    console.error('Booking error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /api/appointments/patient/:patientId
+// Get appointments for patient
 router.get('/patient/:patientId', auth, async (req, res) => {
   try {
     if (
@@ -42,12 +35,11 @@ router.get('/patient/:patientId', auth, async (req, res) => {
     const appointments = await Appointment.find({ patientId: req.params.patientId });
     res.json(appointments);
   } catch (err) {
-    console.error('Fetch patient appointments error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /api/appointments
+// Admin: get all appointments
 router.get('/', auth, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -57,12 +49,11 @@ router.get('/', auth, async (req, res) => {
     const appointments = await Appointment.find().sort({ appointmentDate: -1 });
     res.json(appointments);
   } catch (err) {
-    console.error('Fetch all appointments error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// DELETE /api/appointments/:id
+// Delete appointment
 router.delete('/:id', auth, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -70,18 +61,15 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     const deleted = await Appointment.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Appointment not found' });
-    }
+    if (!deleted) return res.status(404).json({ error: 'Appointment not found' });
 
     res.json({ message: 'Appointment deleted successfully' });
   } catch (err) {
-    console.error('Delete error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// PATCH /api/appointments/:id/approve
+// Approve appointment
 router.patch('/:id/approve', auth, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -94,18 +82,15 @@ router.patch('/:id/approve', auth, async (req, res) => {
       { new: true }
     );
 
-    if (!updated) {
-      return res.status(404).json({ error: 'Appointment not found' });
-    }
+    if (!updated) return res.status(404).json({ error: 'Appointment not found' });
 
     res.json({ message: 'Appointment approved', appointment: updated });
   } catch (err) {
-    console.error('Approve error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /api/appointments/my
+// Get current patient's appointments
 router.get('/my', auth, async (req, res) => {
   try {
     if (req.user.role !== 'patient') {
@@ -115,12 +100,11 @@ router.get('/my', auth, async (req, res) => {
     const appointments = await Appointment.find({ patientId: req.user.userId }).sort({ appointmentDate: -1 });
     res.json(appointments);
   } catch (err) {
-    console.error('Error fetching patient appointments:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// POST /api/appointments/:id/start-consultation
+// Start consultation
 router.post('/:id/start-consultation', auth, async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
@@ -135,12 +119,11 @@ router.post('/:id/start-consultation', auth, async (req, res) => {
 
     res.json({ message: 'Consultation started', appointment });
   } catch (err) {
-    console.error('Start consultation error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// PATCH /api/appointments/:id/consultation
+// Complete consultation
 router.patch('/:id/consultation', auth, async (req, res) => {
   try {
     const updateFields = {
@@ -156,12 +139,11 @@ router.patch('/:id/consultation', auth, async (req, res) => {
     );
     res.json(appointment);
   } catch (err) {
-    console.error('Consultation update error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// GET /api/appointments/reports
+// Reports
 router.get('/reports', auth, async (req, res) => {
   try {
     const appointments = await Appointment.find();
@@ -192,7 +174,6 @@ router.get('/reports', auth, async (req, res) => {
       referralRate
     });
   } catch (err) {
-    console.error('Report generation error:', err.message);
     res.status(500).json({ error: 'Failed to generate report' });
   }
 });
@@ -206,7 +187,7 @@ function findMostCommon(arr) {
   return sorted[0]?.[0] || 'N/A';
 }
 
-// GET /api/appointments/consultations
+// Consultations
 router.get('/consultations', async (req, res) => {
   try {
     const consultations = await Appointment.find({ diagnosis: { $ne: null } })
@@ -218,7 +199,6 @@ router.get('/consultations', async (req, res) => {
   }
 });
 
-// GET /api/appointments/consultation/:id
 router.get('/consultation/:id', async (req, res) => {
   try {
     const consultation = await Appointment.findById(req.params.id);

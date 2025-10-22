@@ -2,7 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
+import OAuthSuccess from './pages/OAuthSuccess'; // ✅ Handles Google redirect
 import ProtectedRoute from './components/ProtectedRoute';
+import OAuthFailure from './pages/OAuthFailure';
+import DashboardRedirect from './components/DashboardRedirect';
 
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -10,7 +14,7 @@ import AllAppointments from './pages/admin/AllAppointments';
 import ManageUsers from './pages/admin/ManageUsers';
 import Reports from './pages/admin/Reports';
 import ConsultationPage from './pages/admin/ConsultationPage';
-import Inventory from './pages/admin/Inventory'; // ✅ NEW
+import Inventory from './pages/admin/Inventory';
 
 // Patient pages
 import PatientDashboard from './pages/patient/PatientDashboard';
@@ -27,6 +31,11 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/oauth-success" element={<OAuthSuccess />} /> {/* ✅ Google OAuth redirect */}
+        <Route path="/oauth-failure" element={<OAuthFailure />} />
+        <Route path="/dashboard" element={<DashboardRedirect />} /> 
+        <Route path="/unauthorized" element={<p>Access denied. You are not authorized to view this page.</p>} />
 
         {/* Admin routes */}
         <Route path="/admin-dashboard" element={
@@ -62,10 +71,10 @@ function App() {
 
         {/* Patient routes */}
         <Route path="/patient-dashboard" element={
-          <ProtectedRoute requiredRole="patient">
-            <PatientDashboard />
-          </ProtectedRoute>
-        } />
+  <ProtectedRoute requiredRole="patient">
+    <PatientDashboard />
+  </ProtectedRoute>
+} />
         <Route path="/patient-appointments" element={
           <ProtectedRoute requiredRole="patient">
             <MyAppointments />

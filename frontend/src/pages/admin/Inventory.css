@@ -2,13 +2,37 @@
   padding: 20px;
   max-width: 1200px;
   margin: auto;
+  height: calc(100vh - 100px); /* Adjust based on your header/navigation height */
+  overflow: hidden;
 }
 
 .inventory-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 20px;
   font-size: 0.95rem;
+  position: relative;
+}
+
+.inventory-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #f4f4f4;
+}
+
+.inventory-table tbody {
+  display: block;
+  overflow-y: auto;
+  height: calc(100vh - 300px); /* Adjust based on your layout */
+}
+
+.inventory-table thead tr,
+.inventory-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .inventory-table th,
@@ -41,6 +65,32 @@
   background-color: #fff3cd;
 }
 
+.expired {
+  color: red;
+  font-weight: bold;
+}
+
+.available {
+  color: green;
+}
+
+.out-of-stock {
+  color: orange;
+}
+
+.delete-btn {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background-color: #cc0000;
+}
+
 @media screen and (max-width: 768px) {
   .inventory-table {
     font-size: 0.85rem;
@@ -49,4 +99,30 @@
   .medicine-form {
     grid-template-columns: 1fr;
   }
+}
+
+/* Add width for specific columns if needed */
+.inventory-table th:nth-child(1),
+.inventory-table td:nth-child(1) {
+  width: 20%;
+}
+
+.inventory-table th:nth-child(2),
+.inventory-table td:nth-child(2),
+.inventory-table th:nth-child(3),
+.inventory-table td:nth-child(3),
+.inventory-table th:nth-child(4),
+.inventory-table td:nth-child(4) {
+  width: 10%;
+}
+
+.inventory-table th:nth-child(5),
+.inventory-table td:nth-child(5),
+.inventory-table th:nth-child(6),
+.inventory-table td:nth-child(6),
+.inventory-table th:nth-child(7),
+.inventory-table td:nth-child(7),
+.inventory-table th:nth-child(8),
+.inventory-table td:nth-child(8) {
+  width: 12.5%;
 }

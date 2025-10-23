@@ -76,6 +76,39 @@ export default function Inventory() {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this medicine?')) return;
+    setError('');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Not authenticated. Please log in.');
+      return;
+    }
+
+    try {
+      const res = await axios.delete(`http://localhost:5000/api/medicines/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Delete response:', res.data);
+      fetchInventory();
+    } catch (err) {
+      console.error('Error deleting medicine:', err);
+      if (err.response) {
+        console.error('Server response:', err.response.status, err.response.data);
+        setError(err.response.data.message || `Delete failed (${err.response.status})`);
+        alert('Delete failed: ' + (err.response.data.message || JSON.stringify(err.response.data)));
+      } else {
+        setError('Network or server error. Check backend and CORS.');
+      }
+    }
+  };
+
+  const getStatus = (medicine) => {
+    if (!medicine.available) return 'Out of Stock';
+    if (medicine.expiryDate && new Date(medicine.expiryDate) < new Date()) return 'Expired';
+    return 'Available';
+  };
+
   return (
     <AdminLayout>
       <div className="inventory-container">
@@ -111,6 +144,7 @@ export default function Inventory() {
                 <th>Unit</th>
                 <th>Expiry</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -122,7 +156,17 @@ export default function Inventory() {
                   <td>{med.capsulesPerBox}</td>
                   <td>{med.unit}</td>
                   <td>{med.expiryDate ? new Date(med.expiryDate).toLocaleDateString() : '—'}</td>
-                  <td>{med.available ? 'Available' : 'Out of Stock'}</td>
+                  <td className={getStatus(med).toLowerCase()}>
+                    {getStatus(med)}
+                  </td>
+                  <td>
+                    <button 
+                      onClick={() => handleDelete(med._id)}
+                      className="delete-btn"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

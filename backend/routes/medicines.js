@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose'); // <-- add this
 const Medicine = require('../models/medicine');
 
 // GET all medicines
@@ -113,6 +114,40 @@ router.post('/deduct', async (req, res) => {
   } catch (err) {
     console.error('Deduction error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/medicines/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    // Auth: expect Authorization: Bearer <token>
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'No token provided' });
+
+    const jwt = require('jsonwebtoken');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // optional: restrict to admin role
+    if (decoded.role && decoded.role !== 'admin') {
+      return res.status(403).json({ message: 'Insufficient permissions' });
+    }
+
+    // use the already-imported mongoose and Medicine above
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid ID' });
+    }
+
+    const deleted = await Medicine.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'Medicine not found' });
+
+    return res.json({ message: 'Medicine deleted', id });
+  } catch (err) {
+    console.error('Delete medicine error:', err);
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -22,21 +22,9 @@ export default function PatientDashboard() {
         return;
       }
 
-      // 🔍 Double-check role using Google ID if available
-      if (googleId) {
-        try {
-          const res = await axios.get(`http://localhost:5000/api/users/role-by-google/${googleId}`);
-          const fetchedRole = res.data.role;
-          if (fetchedRole !== 'patient') {
-            navigate('/unauthorized');
-            return;
-          }
-        } catch (err) {
-          console.error('Error validating role via Google ID:', err.response?.data || err.message);
-          navigate('/unauthorized');
-          return;
-        }
-      } else if (role !== 'patient') {
+      // Simple role check
+      if (role !== 'patient') {
+        console.log('Role check failed:', { role, expected: 'patient' });
         navigate('/unauthorized');
         return;
       }

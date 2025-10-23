@@ -1,8 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const { uploadAvatar } = require('../controllers/profileController');
 
 const router = express.Router();
 
@@ -18,14 +18,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST /api/profile/avatar
-router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
-  try {
-    const imagePath = `/uploads/${req.file.filename}`;
-    await User.findByIdAndUpdate(req.user.userId, { avatar: imagePath });
-    res.json({ message: 'Avatar updated', avatar: imagePath });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to upload avatar' });
-  }
-});
+router.post('/avatar', auth, upload.single('avatar'), uploadAvatar);
 
 module.exports = router;

@@ -17,7 +17,6 @@ export default function PatientLayout({ children }) {
           <li onClick={() => navigate('/patient-dashboard')}>Dashboard</li>
           <li onClick={() => navigate('/patient-appointments')}>My Appointments</li>
           <li onClick={() => navigate('/patient-book')}>Book Appointment</li>
-          <li onClick={() => navigate('/patient-consultations')}>My Consultations</li>
           <li onClick={() => navigate('/patient-profile')}>Profile</li>
         </ul>
         <button onClick={handleLogout} className="logout-button">Logout</button>

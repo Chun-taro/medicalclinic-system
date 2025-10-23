@@ -124,30 +124,72 @@ h2 {
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background-color: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.prescribed-row span {
+.medicine-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.medicine-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.expiry-date {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.quantity-controls label {
+  font-size: 0.85rem;
+  color: #495057;
   font-weight: 500;
 }
 
-.prescribed-row input {
-  width: 80px;
-  padding: 6px;
+.quantity-input {
+  width: 60px;
+  padding: 4px 6px;
   font-size: 0.9rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  text-align: center;
 }
 
-.prescribed-row button {
-  background-color: #ff4d4f;
+.capsules-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.remove-medicine {
+  background-color: #dc3545;
   color: #fff;
   border: none;
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
 }
 
-.prescribed-row button:hover {
-  background-color: #e03e3e;
+.remove-medicine:hover {
+  background-color: #c82333;
 }
 
 button[type="submit"] {

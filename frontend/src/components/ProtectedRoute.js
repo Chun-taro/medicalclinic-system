@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   // Check if role exists and matches required role
   if (requiredRole && (!role || role !== requiredRole)) {
     console.log(`Role mismatch: expected ${requiredRole}, got ${role}`);
-    return <Navigate to="/" replace />;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;

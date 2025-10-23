@@ -4,8 +4,9 @@ import Signup from './pages/Signup';
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
 import OAuthSuccess from './pages/OAuthSuccess'; // ✅ Handles Google redirect
-import ProtectedRoute from './components/ProtectedRoute';
 import OAuthFailure from './pages/OAuthFailure';
+import GoogleSignup from './pages/GoogleSignup';
+import ProtectedRoute from './components/ProtectedRoute';
 import DashboardRedirect from './components/DashboardRedirect';
 
 // Admin pages
@@ -21,7 +22,6 @@ import PatientDashboard from './pages/patient/PatientDashboard';
 import MyAppointments from './pages/patient/MyAppointments';
 import BookAppointment from './pages/patient/BookAppointment';
 import Profile from './pages/patient/Profile';
-import MyConsultations from './pages/patient/MyConsultations';
 
 function App() {
   return (
@@ -34,6 +34,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} /> {/* ✅ Google OAuth redirect */}
         <Route path="/oauth-failure" element={<OAuthFailure />} />
+        <Route path="/google-signup" element={<GoogleSignup />} /> {/* ✅ Google signup completion */}
         <Route path="/dashboard" element={<DashboardRedirect />} /> 
         <Route path="/unauthorized" element={<p>Access denied. You are not authorized to view this page.</p>} />
 
@@ -88,11 +89,6 @@ function App() {
         <Route path="/patient-profile" element={
           <ProtectedRoute requiredRole="patient">
             <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path="/patient-consultations" element={
-          <ProtectedRoute requiredRole="patient">
-            <MyConsultations />
           </ProtectedRoute>
         } />
       </Routes>

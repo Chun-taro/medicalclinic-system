@@ -1,17 +1,16 @@
 import './Auth.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Recaptcha from '../components/Recaptcha';
 
-export default function Signup() {
+export default function GoogleSignup() {
   const [form, setForm] = useState({
+    googleId: '',
+    email: '',
     firstName: '',
     lastName: '',
     middleName: '',
-    email: '',
-    password: '',
-    role: 'patient',
     idNumber: '',
     sex: '',
     civilStatus: '',
@@ -42,6 +41,28 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Get Google user data from URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const googleId = params.get('googleId');
+    const email = params.get('email');
+    const firstName = params.get('firstName');
+    const lastName = params.get('lastName');
+
+    if (googleId && email && firstName && lastName) {
+      setForm(prev => ({
+        ...prev,
+        googleId,
+        email,
+        firstName,
+        lastName
+      }));
+    } else {
+      // If no Google data, redirect to regular signup
+      navigate('/signup');
+    }
+  }, [navigate]);
+
   const handleRecaptchaVerify = (token) => {
     setRecaptchaToken(token);
     setRecaptchaError('');
@@ -53,15 +74,10 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
-    const { firstName, lastName, email, password, idNumber, contactNumber } = form;
+    const { googleId, email, firstName, lastName, idNumber, contactNumber } = form;
 
-    if (!firstName || !lastName || !email || !password || !idNumber || !contactNumber) {
-      alert('Please fill out all required fields (First Name, Last Name, Email, Password, ID Number, Contact Number)');
-      return;
-    }
-
-    if (password.length < 6) {
-      alert('Password must be at least 6 characters');
+    if (!googleId || !email || !firstName || !lastName || !idNumber || !contactNumber) {
+      alert('Please fill out all required fields (ID Number, Contact Number)');
       return;
     }
 
@@ -72,7 +88,7 @@ export default function Signup() {
 
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:5000/api/auth/signup', {
+      const res = await axios.post('http://localhost:5000/api/auth/google-signup', {
         ...form,
         recaptchaToken
       }, {
@@ -82,11 +98,12 @@ export default function Signup() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userId', res.data.userId);
       localStorage.setItem('role', res.data.role);
+      localStorage.setItem('googleId', res.data.googleId);
 
-      alert('Signup successful');
-      navigate(`/${res.data.role}-dashboard`);
+      alert('Google signup completed successfully!');
+      navigate('/patient-dashboard');
     } catch (err) {
-      alert(err.response?.data?.error || 'Signup failed');
+      alert(err.response?.data?.error || 'Google signup failed');
     } finally {
       setLoading(false);
     }
@@ -96,25 +113,31 @@ export default function Signup() {
     <div className="auth-wrapper">
       <div className="auth-left">
         <div className="form-wrapper">
-          <h2>Create Your Account</h2>
-
-          <a href="http://localhost:5000/api/auth/google">
-            <button className="google-button">Sign Up with Google</button>
-          </a>
+          <h2>Complete Your Registration</h2>
+          <p className="google-info">
+            Welcome {form.firstName}! Please complete your profile to continue.
+          </p>
 
           <input
             type="text"
             placeholder="First Name *"
             value={form.firstName}
-            onChange={e => setForm({ ...form, firstName: e.target.value })}
-            required
+            disabled
+            style={{ backgroundColor: '#f5f5f5' }}
           />
           <input
             type="text"
             placeholder="Last Name *"
             value={form.lastName}
-            onChange={e => setForm({ ...form, lastName: e.target.value })}
-            required
+            disabled
+            style={{ backgroundColor: '#f5f5f5' }}
+          />
+          <input
+            type="email"
+            placeholder="Email Address *"
+            value={form.email}
+            disabled
+            style={{ backgroundColor: '#f5f5f5' }}
           />
           <input
             type="text"
@@ -127,20 +150,6 @@ export default function Signup() {
             placeholder="ID Number *"
             value={form.idNumber}
             onChange={e => setForm({ ...form, idNumber: e.target.value })}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email Address *"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password *"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
             required
           />
           <input
@@ -234,7 +243,7 @@ export default function Signup() {
           </div>
 
           <button onClick={handleSignup} disabled={loading}>
-            {loading ? 'Signing up...' : 'Sign Up'}
+            {loading ? 'Completing Registration...' : 'Complete Registration'}
           </button>
 
           <p>

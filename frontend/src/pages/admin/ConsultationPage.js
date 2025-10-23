@@ -82,7 +82,7 @@ export default function ConsultationPage() {
     setPrescribedList(prev =>
       prev.map(p =>
         p.medicineId === medicineId
-          ? { ...p, quantity: parseInt(qty) || 1 }
+          ? { ...p, quantity: parseInt(qty) || 0 }
           : p
       )
     );
@@ -92,12 +92,20 @@ export default function ConsultationPage() {
     e.preventDefault();
     const token = localStorage.getItem('token');
 
+    // Validate prescribed medicines - filter out medicines with 0 quantity
+    const validPrescribedList = prescribedList.filter(med => med.quantity > 0);
+    
+    if (prescribedList.length > 0 && validPrescribedList.length === 0) {
+      alert('Please set quantities for prescribed medicines or remove them.');
+      return;
+    }
+
     try {
       // 1. Deduct medicines from inventory
-      if (prescribedList.length > 0) {
+      if (validPrescribedList.length > 0) {
         await axios.post(
           'http://localhost:5000/api/medicines/deduct',
-          { prescribed: prescribedList },
+          { prescribed: validPrescribedList },
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
@@ -107,7 +115,7 @@ export default function ConsultationPage() {
         `http://localhost:5000/api/appointments/${selectedAppointment._id}/consultation`,
         {
           ...form,
-          medicinesPrescribed: prescribedList,
+          medicinesPrescribed: validPrescribedList,
           consultationCompletedAt: new Date().toISOString()
         },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -201,7 +209,7 @@ export default function ConsultationPage() {
               {
                 medicineId: med._id,
                 name: med.name,
-                quantity: 1,
+                quantity: 0,
                 expiryDate: med.expiryDate // ✅ include expiry here
               }
             ]);
@@ -216,25 +224,35 @@ export default function ConsultationPage() {
 
                 {prescribedList.length > 0 && (
   <div className="prescribed-list">
+    <h5>Prescribed Medicines:</h5>
     {prescribedList.map(p => (
       <div key={p.medicineId} className="prescribed-row">
-        <span>
-          {p.name} — Exp: {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString() : '—'}
-        </span>
-        <input
-          type="number"
-          min="1"
-          value={p.quantity}
-          onChange={e => handleQuantityChange(p.medicineId, e.target.value)}
-          placeholder="Qty"
-        />
+        <div className="medicine-info">
+          <span className="medicine-name">{p.name}</span>
+          <span className="expiry-date">Exp: {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString() : '—'}</span>
+        </div>
+        <div className="quantity-controls">
+          <label>Quantity:</label>
+          <input
+            type="number"
+            min="0"
+            max="999"
+            value={p.quantity}
+            onChange={e => handleQuantityChange(p.medicineId, e.target.value)}
+            placeholder="0"
+            className="quantity-input"
+          />
+          <span className="capsules-label">capsules</span>
+        </div>
         <button
           type="button"
+          className="remove-medicine"
           onClick={() =>
             setPrescribedList(prev => prev.filter(m => m.medicineId !== p.medicineId))
           }
+          title="Remove medicine"
         >
-          ❌
+          ❌ Remove
         </button>
       </div>
     ))}

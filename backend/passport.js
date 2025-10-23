@@ -29,15 +29,16 @@ passport.use(new GoogleStrategy({
     }
 
     if (!user) {
-      user = await User.create({
+      // Instead of creating user, return a special object indicating new user
+      const newUserData = {
         googleId,
         email,
         firstName,
         lastName,
-        password: 'google-oauth',
-        role: 'patient'
-      });
-      console.log(`🆕 Created new user: ${email}, role: ${user.role}`);
+        isNewUser: true
+      };
+      console.log(`🆕 New Google user detected: ${email}`);
+      return done(null, newUserData);
     }
 
     return done(null, user);

@@ -6,7 +6,7 @@ const session = require('express-session');
 const passport = require('passport');
 
 const authRoutes = require('./routes/auth');
-const appointmentRoutes = require('./routes/Appointments');
+const appointmentRoutes = require('./routes/appointments');
 const profileRoutes = require('./routes/profile');
 const avatarRoutes = require('./routes/avatar');
 const userRoutes = require('./routes/users');
@@ -90,7 +90,20 @@ app.get('/api/auth/google/callback',
         return res.redirect('http://localhost:3000/oauth-failure');
       }
 
-      console.log(`🔐 Logging in user ${user.email} with role: ${user.role}`); // ✅ now safe
+      // Check if this is a new user who needs to complete signup
+      if (user.isNewUser) {
+        console.log(`🆕 New Google user needs to complete signup: ${user.email}`);
+        const signupUrl = new URL('http://localhost:3000/google-signup');
+        signupUrl.searchParams.set('googleId', user.googleId);
+        signupUrl.searchParams.set('email', user.email);
+        signupUrl.searchParams.set('firstName', user.firstName);
+        signupUrl.searchParams.set('lastName', user.lastName);
+        
+        console.log('🔄 Redirecting to Google signup:', signupUrl.toString());
+        return res.redirect(signupUrl.toString());
+      }
+
+      console.log(`🔐 Logging in existing user ${user.email} with role: ${user.role}`);
 
       const validRoles = ['admin', 'patient', 'doctor', 'nurse'];
       if (!validRoles.includes(user.role)) {

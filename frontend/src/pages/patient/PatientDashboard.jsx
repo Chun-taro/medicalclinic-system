@@ -29,7 +29,7 @@ export default function PatientDashboard() {
         return;
       }
 
-      // ✅ Fetch appointments
+      //  Fetch appointments
       try {
         const res = await axios.get(`http://localhost:5000/api/appointments/patient/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }

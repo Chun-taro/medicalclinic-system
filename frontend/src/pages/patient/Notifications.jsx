@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PatientLayout from './PatientLayout';
-import './Notifications.css';
+import './Style/Notifications.css';
+
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);

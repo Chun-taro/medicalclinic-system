@@ -7,6 +7,7 @@ export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('admin'); // ✅ track which tab is active
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -30,60 +31,61 @@ export default function ManageUsers() {
   const handleRoleChange = async (id, newRole) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/users/${id}/role`, { role: newRole }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(
+        `http://localhost:5000/api/users/${id}/role`,
+        { role: newRole },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       setUsers(prev =>
-        prev.map(user => user._id === id ? { ...user, role: newRole } : user)
+        prev.map(user => (user._id === id ? { ...user, role: newRole } : user))
       );
     } catch (err) {
       console.error('Error updating role:', err.message);
     }
   };
 
-  const renderTable = (title, role) => {
+  const renderTable = role => {
     const filtered = users.filter(user => user.role === role);
-    return (
-      <>
-        <h3>{title}</h3>
-        {filtered.length === 0 ? (
-          <p>No {title.toLowerCase()} found.</p>
-        ) : (
-          <table className="user-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Change Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(user => (
-                <tr key={user._id}>
-                  <td>{user.name || `${user.firstName} ${user.lastName}`}</td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`role-badge ${user.role === 'admin' ? 'role-admin' : 'role-patient'}`}>
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                    </span>
-                  </td>
-                  <td>
-                    <select
-                      value={user.role}
-                      onChange={e => handleRoleChange(user._id, e.target.value)}
-                    >
-                      <option value="admin">admin</option>
-                      <option value="patient">patient</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </>
+    return filtered.length === 0 ? (
+      <p>No {role}s found.</p>
+    ) : (
+      <table className="user-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Change Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map(user => (
+            <tr key={user._id}>
+              <td>{user.name || `${user.firstName} ${user.lastName}`}</td>
+              <td>{user.email}</td>
+              <td>
+                <span
+                  className={`role-badge ${
+                    user.role === 'admin' ? 'role-admin' : 'role-patient'
+                  }`}
+                >
+                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                </span>
+              </td>
+              <td>
+                <select
+                  value={user.role}
+                  onChange={e => handleRoleChange(user._id, e.target.value)}
+                >
+                  <option value="admin">admin</option>
+                  <option value="patient">patient</option>
+                </select>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
@@ -98,8 +100,27 @@ export default function ManageUsers() {
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
         <>
-          {renderTable('Admins', 'admin')}
-          {renderTable('Patients', 'patient')}
+          {/* ✅ Tab Buttons */}
+          <div className="tabs">
+            <button
+              className={activeTab === 'admin' ? 'active' : ''}
+              onClick={() => setActiveTab('admin')}
+            >
+              Admins
+            </button>
+            <button
+              className={activeTab === 'patient' ? 'active' : ''}
+              onClick={() => setActiveTab('patient')}
+            >
+              Patients
+            </button>
+          </div>
+
+          {/* ✅ Tab Content */}
+          <div className="tab-content">
+            {activeTab === 'admin' && renderTable('admin')}
+            {activeTab === 'patient' && renderTable('patient')}
+          </div>
         </>
       )}
     </AdminLayout>

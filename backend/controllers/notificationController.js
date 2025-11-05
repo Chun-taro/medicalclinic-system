@@ -1,80 +1,78 @@
 const Notification = require('../models/Notification');
 
-// 📌 Get notifications
+// 📌 Get all notifications for logged-in user
 const getNotifications = async (req, res) => {
   try {
-    let filter = {};
+    let query = {};
+
     if (req.user.role === 'admin') {
-      filter.recipientType = 'admin';
+      query.recipientType = 'admin';
     } else {
-      filter = { userId: req.user.userId, recipientType: 'patient' };
+      query.userId = req.user.userId;
     }
 
-    const notifications = await Notification.find(filter)
+    const notifications = await Notification.find(query)
       .sort({ timestamp: -1 })
       .lean();
 
     res.json(notifications);
   } catch (err) {
-    console.error('❌ Get notifications error:', err.message);
+    console.error('❌ Fetch notifications error:', err.message);
     res.status(500).json({ error: 'Failed to fetch notifications' });
   }
 };
 
-// 📌 Get unread count
+// 📌 Get unread notification count
 const getUnreadCount = async (req, res) => {
   try {
-    let filter = { read: false };
+    let query = { read: false };
+
     if (req.user.role === 'admin') {
-      filter.recipientType = 'admin';
+      query.recipientType = 'admin';
     } else {
-      filter = { ...filter, userId: req.user.userId, recipientType: 'patient' };
+      query.userId = req.user.userId;
     }
 
-    const count = await Notification.countDocuments(filter);
+    const count = await Notification.countDocuments(query);
     res.json({ unreadCount: count });
   } catch (err) {
-    console.error('❌ Get unread count error:', err.message);
-    res.status(500).json({ error: 'Failed to fetch unread count' });
+    console.error('❌ Unread count error:', err.message);
+    res.status(500).json({ error: 'Failed to count unread notifications' });
   }
 };
 
-// 📌 Mark one as read
+// 📌 Mark one notification as read
 const markAsRead = async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
-    if (!notification) return res.status(404).json({ error: 'Notification not found' });
-
-    // Only admin or the owner can mark as read
-    if (req.user.role !== 'admin' && String(notification.userId) !== String(req.user.userId)) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    notification.read = true;
-    await notification.save();
-
+    const updated = await Notification.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: { read: true } },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: 'Notification not found' });
     res.json({ message: 'Notification marked as read' });
   } catch (err) {
     console.error('❌ Mark as read error:', err.message);
-    res.status(500).json({ error: 'Failed to mark notification as read' });
+    res.status(500).json({ error: 'Failed to update notification' });
   }
 };
 
-// 📌 Mark all as read
+// 📌 Mark all notifications as read
 const markAllAsRead = async (req, res) => {
   try {
-    let filter = {};
+    let query = { read: false };
+
     if (req.user.role === 'admin') {
-      filter.recipientType = 'admin';
+      query.recipientType = 'admin';
     } else {
-      filter = { userId: req.user.userId, recipientType: 'patient' };
+      query.userId = req.user.userId;
     }
 
-    await Notification.updateMany(filter, { $set: { read: true } });
+    await Notification.updateMany(query, { $set: { read: true } });
     res.json({ message: 'All notifications marked as read' });
   } catch (err) {
-    console.error('❌ Mark all as read error:', err.message);
-    res.status(500).json({ error: 'Failed to mark all as read' });
+    console.error('❌ Mark all error:', err.message);
+    res.status(500).json({ error: 'Failed to update notifications' });
   }
 };
 

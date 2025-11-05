@@ -75,16 +75,26 @@ export default function Login() {
             <h2 className="clinic-title">BukSU<br />Medical Clinic</h2>
             <hr className="form-divider" />
           </div>
-
-          <div className="google-login">
-            <p className="google-label">Continue with Google</p>
-            <a href="http://localhost:5000/api/auth/google">
-              <button className="google-button">
-                <img src={GoogleLogo} alt="Google logo" className="google-icon" />
-              </button>
-            </a>
-          </div>
-
+<p className="google-label">Continue with Google</p>
+          <a href="http://localhost:5000/api/auth/google" style={{ textDecoration: "none" }}>
+  <button
+    style={{
+      border: "none",
+      backgroundColor: "transparent",
+      padding: "0",
+      cursor: "pointer"
+    }}
+  >
+    <img
+      src={GoogleLogo}
+      alt="Google logo"
+      style={{
+        width: "90px",
+        height: "40px"
+      }}
+    />
+  </button>
+</a>
           <input
             type="text"
             placeholder="Email or phone number"

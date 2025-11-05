@@ -172,30 +172,26 @@ export default function ConsultationPage() {
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
-              {approvedAppointments.map(app => {
-  console.log('Appointment:', app); // 👈 Add this line
-
-  return (
+           <tbody>
+  {approvedAppointments.map(app => (
     <tr key={app._id}>
       <td>
-        <span
-          className="clickable-name"
-          onClick={() => handleViewMRF(app.patientId)} // or app.patient._id, etc.
-        >
-          {app.firstName} {app.lastName}
-        </span>
-      </td>
-      <td>{app.email}</td>
+  <span
+    className="clickable-name"
+    onClick={() => handleViewMRF(app.patientId?._id)}
+  >
+    {app.patientId?.firstName} {app.patientId?.lastName}
+  </span>
+</td>
+<td>{app.patientId?.email}</td>
       <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
       <td>{app.purpose}</td>
       <td>
         <button onClick={() => handleStartConsultation(app)}>🩺 Start</button>
       </td>
     </tr>
-  );
-})}
-            </tbody>
+  ))}
+</tbody>
           </table>
         )}
 

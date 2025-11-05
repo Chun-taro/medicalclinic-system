@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import PatientLayout from './PatientLayout';
-import './book-appointment.css';
+import './Style/book-appointment.css';
 
 const initialFormState = {
   firstName: '',

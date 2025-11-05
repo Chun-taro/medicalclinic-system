@@ -27,7 +27,7 @@
 .auth-right {
   position: relative;
   z-index: 1;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(248, 248, 248, 0.534);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 16px;
@@ -137,23 +137,21 @@
 }
 
 .google-button {
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
+  background-color: transparent; /* removes blue background */
+  border: none;                  /* removes any border */
+  padding: 0;                    /* removes extra spacing */
+  cursor: pointer;              /* keeps it clickable */
+  display: inline-flex;         /* aligns image nicely */
   align-items: center;
-  justify-content: center;
 }
 
 .google-button:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  opacity: 0.8;
 }
 
 .google-icon {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
+  width: 24px;   /* adjust size as needed */
+  height: auto;
 }
 
 /* Links */

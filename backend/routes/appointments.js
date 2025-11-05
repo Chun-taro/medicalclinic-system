@@ -10,8 +10,10 @@ const {
   completeConsultation,
   generateReports,
   getConsultations,
-  getConsultationById
+  getConsultationById,
+  updateAppointment // ✅ Add this to your controller exports
 } = require('../controllers/appointmentController');
+
 const { auth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -20,10 +22,12 @@ const router = express.Router();
 router.post('/book', auth, bookAppointment);
 router.get('/patient/:patientId', auth, getPatientAppointments);
 router.get('/my', auth, getMyAppointments);
+router.patch('/:id', auth, updateAppointment);
 
 // 🛠 Admin routes
 router.get('/', auth, getAllAppointments);
 router.delete('/:id', auth, deleteAppointment);
+router.patch('/:id', auth, updateAppointment); // ✅ NEW: Edit/reschedule appointment
 router.patch('/:id/approve', auth, approveAppointment);
 
 // 🩺 Consultation routes

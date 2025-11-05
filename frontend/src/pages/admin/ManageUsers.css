@@ -69,6 +69,36 @@
   border-color: #1E90FF;
 }
 
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tabs button {
+  padding: 8px 16px;
+  border: 1px solid #0077cc;
+  background: #f0f8ff;
+  color: #0077cc;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabs button.active {
+  background: #0077cc;
+  color: #fff;
+}
+
+.tabs button:hover:not(.active) {
+  background: #e6f2ff;
+}
+
+.tab-content {
+  margin-top: 10px;
+}
+
 /* Responsive for mobile */
 @media (max-width: 768px) {
   .user-table th,

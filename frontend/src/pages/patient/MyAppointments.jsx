@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import PatientLayout from './PatientLayout';
-import './patient-appointments.css';
+import './Style/patient-appointments.css';
 
 export default function MyAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -73,14 +73,14 @@ export default function MyAppointments() {
               <tbody>
                 {appointments.map(app => (
                   <tr key={app._id}>
-                    <td>{app.firstName || app.name || 'Unknown'} {app.lastName || ''}</td>
-                    <td>{app.email || '—'}</td>
-                    <td>{app.phone || '—'}</td>
+                    <td>{app.patientId?.firstName} {app.patientId?.lastName}</td>
+                    <td>{app.patientId?.email || '—'}</td>
+                    <td>{app.patientId?.contactNumber || '—'}</td>
                     <td>{app.purpose || '—'}</td>
                     <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
                     <td>{app.status}</td>
                     <td>
-                      <button onClick={() => alert(`Edit form for ${app.firstName || app.name}`)}>✏️</button>
+                      <button onClick={() => alert(`Edit form for ${app.patientId?.firstName}`)}>✏️</button>
                       <button onClick={() => handleDelete(app._id)}>🗑️</button>
                     </td>
                   </tr>

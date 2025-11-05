@@ -2,6 +2,8 @@ const Appointment = require('../models/Appointment');
 const User = require('../models/User');
 const { sendNotification } = require('../utils/sendNotification');
 
+
+
 // 📌 Book appointment
 const bookAppointment = async (req, res) => {
   try {
@@ -15,9 +17,11 @@ const bookAppointment = async (req, res) => {
     }
 
     const appointment = new Appointment({
-      patientId: req.user.userId,
-      ...req.body
-    });
+  patientId: req.user.userId,   // link to the logged-in patient
+  appointmentDate,
+  purpose,
+  typeOfVisit: req.body.typeOfVisit || 'scheduled'
+});
 
     await appointment.save();
 
@@ -58,11 +62,10 @@ const getMyAppointments = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
 
     const appointments = await Appointment.find({ patientId: req.user.userId })
-      .select('appointmentDate status purpose typeOfVisit diagnosis consultationCompletedAt')
+      .populate('patientId', 'firstName lastName email contactNumber') // ✅ include patient info
       .sort({ appointmentDate: -1 })
       .skip(page * limit)
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
     res.json(appointments);
   } catch (err) {
@@ -95,6 +98,7 @@ const getPatientAppointments = async (req, res) => {
 };
 
 // 📌 Get all appointments (admin only)
+// 📌 Get all appointments (admin only)
 const getAllAppointments = async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -105,7 +109,8 @@ const getAllAppointments = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
 
     const appointments = await Appointment.find()
-      .select('firstName lastName appointmentDate status purpose typeOfVisit')
+      .populate('patientId', 'firstName lastName email contactNumber') // ✅ pull from User
+      .select('appointmentDate status purpose typeOfVisit patientId')   // include patientId
       .sort({ appointmentDate: -1 })
       .skip(page * limit)
       .limit(limit)
@@ -117,6 +122,8 @@ const getAllAppointments = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
 
 // 📌 Approve appointment
 const approveAppointment = async (req, res) => {
@@ -311,16 +318,75 @@ function findMostCommon(arr) {
   return sorted[0]?.[0] || 'N/A';
 }
 
+// 📌 Update appointment (admin or patient)
+const updateAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    const isAdmin = req.user.role === 'admin';
+    const isOwner = String(appointment.patientId) === String(req.user.userId);
+
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Track changes
+    const changes = [];
+    const allowedFields = ['appointmentDate', 'purpose', 'typeOfVisit', 'diagnosis'];
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined && req.body[field] !== appointment[field]) {
+        appointment[field] = req.body[field];
+        changes.push(field);
+      }
+    });
+
+    await appointment.save();
+
+    // Build notification message if something changed
+    if (changes.length > 0) {
+      let message = `Your appointment has been updated.`;
+      if (changes.includes('appointmentDate')) {
+        message += ` New date: ${new Date(appointment.appointmentDate).toLocaleDateString()}.`;
+      }
+      if (changes.includes('purpose')) {
+        message += ` Purpose: ${appointment.purpose}.`;
+      }
+      if (changes.includes('typeOfVisit')) {
+        message += ` Type of visit: ${appointment.typeOfVisit}.`;
+      }
+      if (changes.includes('diagnosis')) {
+        message += ` Diagnosis: ${appointment.diagnosis}.`;
+      }
+
+      sendNotification({
+        userId: appointment.patientId,
+        status: 'updated',
+        message,
+        recipientType: 'patient'
+      });
+    }
+
+    res.json({ message: 'Appointment updated', appointment });
+  } catch (err) {
+    console.error('❌ Update error:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   bookAppointment,
-  getMyAppointments,
   getPatientAppointments,
   getAllAppointments,
+  deleteAppointment,
   approveAppointment,
+  getMyAppointments,
   startConsultation,
   completeConsultation,
-  deleteAppointment,
   generateReports,
   getConsultations,
-  getConsultationById
+  getConsultationById,
+  updateAppointment // ✅ This must be included
 };

@@ -9,11 +9,10 @@ export default function Inventory() {
   const [form, setForm] = useState({
     name: '',
     quantityInStock: '',
-    boxesInStock: '',
-    capsulesPerBox: '',
     unit: '',
     expiryDate: ''
   });
+  const [dispenseForm, setDispenseForm] = useState({ medId: '', quantity: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -49,24 +48,14 @@ export default function Inventory() {
       const token = localStorage.getItem('token');
       const payload = {
         ...form,
-        quantityInStock: parseInt(form.quantityInStock),
-        boxesInStock: parseInt(form.boxesInStock),
-        capsulesPerBox: parseInt(form.capsulesPerBox)
+        quantityInStock: parseInt(form.quantityInStock)
       };
 
       await axios.post('http://localhost:5000/api/medicines', payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setForm({
-        name: '',
-        quantityInStock: '',
-        boxesInStock: '',
-        capsulesPerBox: '',
-        unit: '',
-        expiryDate: ''
-      });
-
+      setForm({ name: '', quantityInStock: '', unit: '', expiryDate: '' });
       fetchInventory();
     } catch (err) {
       console.error('Error adding medicine:', err.message);
@@ -76,7 +65,7 @@ export default function Inventory() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     if (!window.confirm('Are you sure you want to delete this medicine?')) return;
     setError('');
     const token = localStorage.getItem('token');
@@ -86,25 +75,39 @@ export default function Inventory() {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:5000/api/medicines/${id}`, {
+      await axios.delete(`http://localhost:5000/api/medicines/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Delete response:', res.data);
       fetchInventory();
     } catch (err) {
       console.error('Error deleting medicine:', err);
-      if (err.response) {
-        console.error('Server response:', err.response.status, err.response.data);
-        setError(err.response.data.message || `Delete failed (${err.response.status})`);
-        alert('Delete failed: ' + (err.response.data.message || JSON.stringify(err.response.data)));
-      } else {
-        setError('Network or server error. Check backend and CORS.');
-      }
+      setError('Delete failed.');
     }
   };
 
-  const getStatus = (medicine) => {
-    if (!medicine.available) return 'Out of Stock';
+  const handleDispense = async e => {
+    e.preventDefault();
+    if (!dispenseForm.medId || !dispenseForm.quantity) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `http://localhost:5000/api/medicines/${dispenseForm.medId}/dispense`,
+        { quantity: parseInt(dispenseForm.quantity) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert('Medicine dispensed successfully');
+      setDispenseForm({ medId: '', quantity: '' });
+      fetchInventory();
+    } catch (err) {
+      console.error('Error dispensing medicine:', err.message);
+      alert('Failed to dispense medicine');
+    }
+  };
+
+  const getStatus = medicine => {
+    if (medicine.quantityInStock <= 0) return 'Out of Stock';
     if (medicine.expiryDate && new Date(medicine.expiryDate) < new Date()) return 'Expired';
     return 'Available';
   };
@@ -113,18 +116,67 @@ export default function Inventory() {
     <AdminLayout>
       <div className="inventory-container">
         <h2>Medicine Inventory</h2>
-        <p>Track capsules, boxes, and expiry dates.</p>
+        <p>Track capsules and expiry dates. Dispense to walk-in patients.</p>
 
+        {/* Add Medicine */}
         <form className="medicine-form" onSubmit={handleSubmit}>
-          <input type="text" name="name" placeholder="Medicine Name" value={form.name} onChange={handleChange} required />
-          <input type="number" name="quantityInStock" placeholder="Capsules in Stock" value={form.quantityInStock} onChange={handleChange} required />
-          <input type="number" name="boxesInStock" placeholder="Boxes in Stock" value={form.boxesInStock} onChange={handleChange} required />
-          <input type="number" name="capsulesPerBox" placeholder="Capsules per Box" value={form.capsulesPerBox} onChange={handleChange} required />
-          <input type="text" name="unit" placeholder="Unit (e.g. pcs, bottles)" value={form.unit} onChange={handleChange} required />
-          <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange} />
+          <input
+            type="text"
+            name="name"
+            placeholder="Medicine Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="number"
+            name="quantityInStock"
+            placeholder="Capsules in Stock"
+            value={form.quantityInStock}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="unit"
+            placeholder="Unit (e.g. pcs, bottles)"
+            value={form.unit}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="date"
+            name="expiryDate"
+            value={form.expiryDate}
+            onChange={handleChange}
+          />
           <button type="submit" disabled={submitting}>
             {submitting ? 'Adding...' : 'Add Medicine'}
           </button>
+        </form>
+
+        {/* Dispense Medicine */}
+        <form className="dispense-form" onSubmit={handleDispense}>
+          <select
+            value={dispenseForm.medId}
+            onChange={e => setDispenseForm({ ...dispenseForm, medId: e.target.value })}
+            required
+          >
+            <option value="">Select Medicine</option>
+            {medicines.map(med => (
+              <option key={med._id} value={med._id}>
+                {med.name} ({med.quantityInStock} left)
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            placeholder="Quantity to dispense"
+            value={dispenseForm.quantity}
+            onChange={e => setDispenseForm({ ...dispenseForm, quantity: e.target.value })}
+            required
+          />
+          <button type="submit">Dispense</button>
         </form>
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -139,8 +191,6 @@ export default function Inventory() {
               <tr>
                 <th>Name</th>
                 <th>Capsules</th>
-                <th>Boxes</th>
-                <th>Caps/Box</th>
                 <th>Unit</th>
                 <th>Expiry</th>
                 <th>Status</th>
@@ -152,18 +202,11 @@ export default function Inventory() {
                 <tr key={med._id}>
                   <td>{med.name}</td>
                   <td>{med.quantityInStock}</td>
-                  <td>{med.boxesInStock}</td>
-                  <td>{med.capsulesPerBox}</td>
                   <td>{med.unit}</td>
                   <td>{med.expiryDate ? new Date(med.expiryDate).toLocaleDateString() : '—'}</td>
-                  <td className={getStatus(med).toLowerCase()}>
-                    {getStatus(med)}
-                  </td>
+                  <td className={getStatus(med).toLowerCase()}>{getStatus(med)}</td>
                   <td>
-                    <button 
-                      onClick={() => handleDelete(med._id)}
-                      className="delete-btn"
-                    >
+                    <button onClick={() => handleDelete(med._id)} className="delete-btn">
                       Delete
                     </button>
                   </td>

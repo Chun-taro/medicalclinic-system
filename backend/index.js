@@ -8,13 +8,15 @@ const jwt = require('jsonwebtoken');
 const http = require('http');
 const socketIo = require('socket.io');
 
+// 📦 Routes
 const authRoutes = require('./routes/auth');
 const appointmentRoutes = require('./routes/appointments');
 const profileRoutes = require('./routes/profile');
 const userRoutes = require('./routes/users');
 const resetRoutes = require('./routes/reset');
 const medicineRoutes = require('./routes/medicines');
-const notificationRoutes = require('./routes/notification'); // ✅ NEW
+const notificationRoutes = require('./routes/notification');
+
 
 require('./passport'); // Passport strategy config
 
@@ -22,7 +24,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: '*' } });
 
-// ✅ Inject io into every request
+// ✅ Inject io into every request (so controllers can emit events)
 app.use((req, res, next) => {
   req.io = io;
   next();
@@ -57,7 +59,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reset', resetRoutes);
 app.use('/api/medicines', medicineRoutes);
-app.use('/api/notifications', notificationRoutes); // ✅ NEW
+app.use('/api/notifications', notificationRoutes); // ✅ Notifications API
 
 // 🌍 MongoDB connection
 const uri = process.env.MONGO_URI;
@@ -146,4 +148,19 @@ app.get('/api/debug/profile/:id', auth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
+});
+
+// 📡 Socket.IO events
+io.on('connection', (socket) => {
+  console.log('🔌 New client connected:', socket.id);
+
+  // Example: join room by userId for targeted notifications
+  socket.on('join', (userId) => {
+    socket.join(userId);
+    console.log(`👤 User ${userId} joined their room`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('❌ Client disconnected:', socket.id);
+  });
 });

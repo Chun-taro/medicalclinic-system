@@ -1,4 +1,4 @@
-import './Auth.css';
+import './Style/Auth.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';

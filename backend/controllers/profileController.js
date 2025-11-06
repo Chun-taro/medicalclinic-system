@@ -2,23 +2,23 @@ const User = require('../models/User');
 const cloudinary = require('../config/cloudinary');
 const { Readable } = require('stream');
 
-// 🔍 GET profile
+//  GET profile
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
     if (!user) {
-      console.warn(`⚠️ User not found: ${req.user.userId}`);
+      console.warn(` User not found: ${req.user.userId}`);
       return res.status(404).json({ error: 'User not found' });
     }
 
     res.json(user);
   } catch (err) {
-    console.error('❌ Get profile error:', err.message);
+    console.error(' Get profile error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-// ✏️ UPDATE profile
+//  UPDATE profile
 const updateProfile = async (req, res) => {
   try {
     const updates = req.body;
@@ -30,18 +30,18 @@ const updateProfile = async (req, res) => {
     ).select('-password');
 
     if (!updatedUser) {
-      console.warn(`⚠️ Failed to update profile: ${req.user.userId}`);
+      console.warn(` Failed to update profile: ${req.user.userId}`);
       return res.status(404).json({ error: 'User not found' });
     }
 
     res.json({ message: 'Profile updated successfully', user: updatedUser });
   } catch (err) {
-    console.error('❌ Update profile error:', err.message);
+    console.error(' Update profile error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-// 📷 UPLOAD avatar to Cloudinary
+//  UPLOAD avatar to Cloudinary
 const uploadAvatar = async (req, res) => {
   try {
     if (!req.file || !req.file.buffer) {
@@ -70,7 +70,7 @@ const uploadAvatar = async (req, res) => {
     ).select('-password');
 
     if (!updatedUser) {
-      console.warn(`⚠️ Failed to update avatar: ${req.user.userId}`);
+      console.warn(` Failed to update avatar: ${req.user.userId}`);
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -80,7 +80,7 @@ const uploadAvatar = async (req, res) => {
       user: updatedUser
     });
   } catch (err) {
-    console.error('❌ Cloudinary upload error:', err.message);
+    console.error(' Cloudinary upload error:', err.message);
     res.status(500).json({ error: 'Failed to upload avatar' });
   }
 };

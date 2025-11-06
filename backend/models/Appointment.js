@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema({
-  // 🔐 Link to patient
+  //  Link to patient
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
 
-  // 📌 Status tracking
+  // Status tracking
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected', 'in-consultation', 'completed'],
     default: 'pending'
   },
 
-  // ✅ Patient booking fields
+  //  Patient booking fields
   firstName: String,
   lastName: String,
   email: String,
@@ -24,7 +24,7 @@ const appointmentSchema = new mongoose.Schema({
   purpose: String,
   appointmentDate: Date,
 
-  // 🩺 Clinical and administrative fields
+  //  Clinical and administrative fields
   date: Date,
   time: String,
   typeOfVisit: {
@@ -50,7 +50,7 @@ const appointmentSchema = new mongoose.Schema({
   allergies: String,
   requestedDate: Date,
 
-  // 🧪 Vitals
+  //  Vitals
   bloodPressure: String,
   temperature: String,
   oxygenSaturation: String,
@@ -58,7 +58,7 @@ const appointmentSchema = new mongoose.Schema({
   bmi: String,
   bmiIntervention: String,
 
-  // 🧠 Diagnosis and management
+  //  Diagnosis and management
   diagnosis: String,
   management: String,
   medicinesPrescribed: [
@@ -70,7 +70,7 @@ const appointmentSchema = new mongoose.Schema({
   availableInClinic: Boolean,
   quantity: Number,
 
-  // 🏥 Referrals
+  // Referrals
   referredToPhysician: Boolean,
   physicianName: String,
   referredToExternalFaculty: Boolean,
@@ -80,7 +80,7 @@ const appointmentSchema = new mongoose.Schema({
     enum: ['y', 'n']
   },
 
-  // 🚑 First aid
+  //  First aid
   firstAidDone: {
     type: String,
     enum: ['y', 'n']
@@ -90,7 +90,7 @@ const appointmentSchema = new mongoose.Schema({
     enum: ['y', 'n', 'n/a']
   },
 
-  // 🕒 Consultation tracking
+  //  Consultation tracking
   consultationCompletedAt: Date
 }, { timestamps: true });
 

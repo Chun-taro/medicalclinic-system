@@ -235,7 +235,7 @@ const deleteAppointment = async (req, res) => {
 
     res.json({ message: 'Appointment deleted successfully' });
   } catch (err) {
-    console.error('❌ Delete error:', err.message);
+    console.error(' Delete error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

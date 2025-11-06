@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AdminLayout from "./AdminLayout";
-import "./Reports.css";
+import "./Style/Reports.css";
 
 function useRealTime() {
   const [now, setNow] = useState(new Date());

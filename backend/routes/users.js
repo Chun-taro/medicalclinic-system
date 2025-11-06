@@ -16,7 +16,7 @@ router.get('/', auth, getAllUsers);
 router.put('/:id/role', auth, updateUserRole);
 router.get('/role-by-google/:googleId', getRoleByGoogleId);
 router.get('/profile', auth, getProfile);
-router.get('/profile/:id', auth, getProfileById); // ✅ This is the route your frontend needs
+router.get('/profile/:id', auth, getProfileById);
 router.put('/profile', auth, updateProfile);
 router.post('/profile/avatar', auth, uploadAvatar);
 

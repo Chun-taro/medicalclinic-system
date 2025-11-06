@@ -6,7 +6,7 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// 🔐 Local auth routes
+//  Local auth routes
 router.post('/signup', signup);
 router.post('/login', login);
 router.post('/google-signup', googleSignup);
@@ -15,12 +15,12 @@ router.post('/forgot-password', async (req, res) => {
   res.json({ message: 'If your email is registered, a reset link has been sent.' });
 });
 
-// 🌐 Google OAuth initiation
+//  Google OAuth initiation
 router.get('/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
-// 🌐 Google OAuth callback
+//  Google OAuth callback
 router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', async (err, user) => {
     if (err) return next(err);
@@ -50,14 +50,14 @@ router.get('/google/callback', (req, res, next) => {
 
         return res.redirect(redirectUrl.toString());
       } catch (tokenErr) {
-        console.error('❌ Token generation error:', tokenErr.message);
+        console.error(' Token generation error:', tokenErr.message);
         return res.redirect('http://localhost:3000/oauth-failure');
       }
     });
   })(req, res, next);
 });
 
-// 🔐 Token validation route
+//  Token validation route
 router.get('/validate', auth, validateToken);
 
 module.exports = router;

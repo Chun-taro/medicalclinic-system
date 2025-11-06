@@ -189,7 +189,42 @@
 }
 
 /* ────────────────────────────────
-   Stat Cards (Compact Version)
+   Notification Bell
+────────────────────────────────── */
+.notification-wrapper {
+  position: relative;
+  margin-right: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  color: #1e293b;
+}
+
+.notification-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* ────────────────────────────────
+   Stat Cards
 ────────────────────────────────── */
 .stats-grid {
   display: flex;
@@ -288,40 +323,19 @@
   }
 }
 
-/* Highlight calendar dates with appointments */
+/* ────────────────────────────────
+   Calendar Highlights
+────────────────────────────────── */
 .has-appointment {
   background-color: #fde68a !important;
   border-radius: 50%;
   font-weight: bold;
   color: #1e293b;
 }
+
 .past-appointment {
   background-color: #f3f4f6;
   color: #6b7280;
   border-left: 4px solid #9ca3af;
   opacity: 0.85;
-}
-.notification-bell {
-  margin-right: 1rem;
-  cursor: pointer;
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.bell-icon {
-  font-size: 1.5rem;
-  color: #1e293b;
-}
-
-.notification-count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ef4444;
-  color: white;
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  border-radius: 50%;
-  font-weight: bold;
 }

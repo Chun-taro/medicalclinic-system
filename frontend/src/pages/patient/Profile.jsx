@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaCamera } from 'react-icons/fa';
 import PatientLayout from './PatientLayout';
-import './Profile.css';
+import './Style/Profile.css';
 import { usePatient } from '../../context/PatientContext';
 
 export default function Profile() {

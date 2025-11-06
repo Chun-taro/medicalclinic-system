@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './PatientDashboard.css';
+import './Style/PatientDashboard.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, CalendarDays, CalendarPlus, Bell } from 'lucide-react';
 import { usePatient } from '../../context/PatientContext';

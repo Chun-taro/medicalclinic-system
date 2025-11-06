@@ -30,7 +30,7 @@ const sendResetToken = async (req, res) => {
 
     res.json({ message: 'Verification code sent to your email' });
   } catch (err) {
-    console.error('❌ Send token error:', err);
+    console.error(' Send token error:', err);
     res.status(500).json({ error: 'Server error sending token' });
   }
 };

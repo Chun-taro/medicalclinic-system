@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import './Inventory.css';
+import './Style/Inventory.css';
 
 export default function Inventory() {
   const [medicines, setMedicines] = useState([]);

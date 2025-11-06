@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  // 🧑 Personal Info
+  //  Personal Info
   firstName: {
     type: String,
     required: function () {
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   middleName: { type: String, trim: true },
   
-  // 🆔 Identification
+  // Identification
   idNumber: {
     type: String,
     unique: true,
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   
-  // 👤 Demographics
+  //  Demographics
   sex: {
     type: String,
     enum: ['male', 'female', 'other'],
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   birthday: { type: Date },
   age: { type: Number },
   
-  // 📍 Contact Information
+  //  Contact Information
   homeAddress: { type: String, trim: true },
   contactNumber: { type: String, trim: true },
   emergencyContact: {
@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, trim: true }
   },
   
-  // 🏥 Medical Information
+  //  Medical Information
   bloodType: {
     type: String,
     enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema({
   medicalHistory: [{ type: String, trim: true }],
   currentMedications: [{ type: String, trim: true }],
   
-  // 👨‍👩‍👧‍👦 Family History
+  //  Family History
   familyHistory: {
     diabetes: { type: Boolean, default: false },
     hypertension: { type: Boolean, default: false },
@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema({
     other: { type: String, trim: true }
   },
 
-  // 📧 Login Info
+  //  Login Info
   email: {
     type: String,
     required: true,
@@ -85,18 +85,18 @@ const userSchema = new mongoose.Schema({
   },
   googleId: { type: String },
 
-  // 🛡️ Role
+  //  Role
   role: {
     type: String,
     enum: ['patient', 'admin', 'doctor', 'nurse'],
     default: 'patient'
   },
 
-  // 🔐 Password Reset
+  //  Password Reset
   resetToken: String,
   resetTokenExpiry: Date,
 
-  // 🖼️ Profile Picture
+  //  Profile Picture
   avatar: { type: String, default: '' }
 }, { timestamps: true });
 

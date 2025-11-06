@@ -1,6 +1,6 @@
 const User = require('../models/User');
 
-// 🔍 Get all users (admin only)
+// Get all users (admin only)
 const getAllUsers = async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -13,7 +13,7 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// 🔧 Update user role (admin only)
+//  Update user role (admin only)
 const updateUserRole = async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -39,7 +39,7 @@ const updateUserRole = async (req, res) => {
   }
 };
 
-// 🔍 Get role by Google ID
+//  Get role by Google ID
 const getRoleByGoogleId = async (req, res) => {
   try {
     const { googleId } = req.params;
@@ -51,7 +51,7 @@ const getRoleByGoogleId = async (req, res) => {
   }
 };
 
-// 🔍 Get profile by user ID (admin only)
+//  Get profile by user ID (admin only)
 const getProfileById = async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
@@ -65,7 +65,7 @@ const getProfileById = async (req, res) => {
   }
 };
 
-// 🔍 Get profile of logged-in user
+//  Get profile of logged-in user
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
@@ -76,7 +76,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-// ✏️ Update profile of logged-in user
+//  Update profile of logged-in user
 const updateProfile = async (req, res) => {
   try {
     const updates = req.body;
@@ -93,7 +93,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// 📷 Upload avatar
+// Upload avatar
 const uploadAvatar = async (req, res) => {
   try {
     const imagePath = `/uploads/${req.file.filename}`;

@@ -16,7 +16,7 @@ passport.use(new GoogleStrategy({
     let user = await User.findOne({ googleId });
 
     if (user) {
-      console.log(`✅ Found user by Google ID: ${email}, role: ${user.role}`);
+      console.log(` Found user by Google ID: ${email}, role: ${user.role}`);
       return done(null, user);
     }
 
@@ -37,7 +37,7 @@ passport.use(new GoogleStrategy({
       lastName,
       isNewUser: true
     };
-    console.log(`🆕 New Google user detected: ${email}`);
+    console.log(` New Google user detected: ${email}`);
     return done(null, newUserData);
   } catch (err) {
     console.error('Google OAuth error:', err.message);
@@ -57,13 +57,13 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((data, done) => {
   try {
-    // Only parse if it looks like JSON
+  
     if (typeof data === 'string' && data.startsWith('{')) {
       const parsed = JSON.parse(data);
       if (parsed.isNewUser) return done(null, parsed);
     }
 
-    // Otherwise treat as MongoDB ObjectId
+  
     User.findById(data)
       .then(user => done(null, user))
       .catch(err => done(err));

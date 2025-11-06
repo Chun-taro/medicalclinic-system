@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import './appointment-table.css';
+import './Style/appointment-table.css';
 
 export default function AllAppointments() {
   const [appointments, setAppointments] = useState([]);

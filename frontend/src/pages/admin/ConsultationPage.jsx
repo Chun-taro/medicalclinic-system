@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import './consultation.css';
+import './Style/consultation.css';
 
 export default function ConsultationPage() {
   const [approvedAppointments, setApprovedAppointments] = useState([]);

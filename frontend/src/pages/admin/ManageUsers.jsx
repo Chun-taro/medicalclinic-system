@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import './ManageUsers.css';
+import './Style/ManageUsers.css';
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('admin'); // ✅ track which tab is active
+  const [activeTab, setActiveTab] = useState('admin');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -100,7 +100,7 @@ export default function ManageUsers() {
         <p style={{ color: 'red' }}>{error}</p>
       ) : (
         <>
-          {/* ✅ Tab Buttons */}
+          {/* Tab Buttons */}
           <div className="tabs">
             <button
               className={activeTab === 'admin' ? 'active' : ''}
@@ -116,7 +116,7 @@ export default function ManageUsers() {
             </button>
           </div>
 
-          {/* ✅ Tab Content */}
+          {/*  Tab Content */}
           <div className="tab-content">
             {activeTab === 'admin' && renderTable('admin')}
             {activeTab === 'patient' && renderTable('patient')}

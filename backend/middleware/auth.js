@@ -12,11 +12,11 @@ const auth = (req, res, next) => {
     }
 
     // Log token for debugging
-    console.log('🔍 Incoming token:', token);
+    console.log(' Incoming token:', token);
 
     // Validate token format
     if (!token || token.split('.').length !== 3) {
-      console.warn('⚠️ Malformed or missing token');
+      console.warn(' Malformed or missing token');
       return res.status(401).json({ error: 'Malformed or missing token' });
     }
 
@@ -25,7 +25,7 @@ const auth = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    console.error('❌ JWT verification failed:', err.message);
+    console.error(' JWT verification failed:', err.message);
     res.status(401).json({ error: 'Token is not valid' });
   }
 };

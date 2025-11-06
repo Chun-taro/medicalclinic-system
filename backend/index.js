@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const http = require('http');
 const socketIo = require('socket.io');
 
-// 📦 Routes
+// Routes
 const authRoutes = require('./routes/auth');
 const appointmentRoutes = require('./routes/appointments');
 const profileRoutes = require('./routes/profile');
@@ -18,23 +18,23 @@ const medicineRoutes = require('./routes/medicines');
 const notificationRoutes = require('./routes/notification');
 
 
-require('./passport'); // Passport strategy config
+require('./passport');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: '*' } });
 
-// ✅ Inject io into every request (so controllers can emit events)
+//  Inject io into every request (so controllers can emit events)
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// 🌐 Middleware
+//  Middleware
 app.use(cors());
 app.use(express.json());
 
-// 🛡️ Session
+//  Session
 app.use(session({
   secret: process.env.SESSION_SECRET || 'MySecretKey',
   resave: false,
@@ -45,26 +45,26 @@ app.use(session({
   }
 }));
 
-// 🔐 Passport
+//  Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 📁 Static file serving
+//  Static file serving
 app.use('/uploads', express.static('uploads'));
 
-// 📦 Routes
+//  Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reset', resetRoutes);
 app.use('/api/medicines', medicineRoutes);
-app.use('/api/notifications', notificationRoutes); // ✅ Notifications API
+app.use('/api/notifications', notificationRoutes);
 
-// 🌍 MongoDB connection
+//  MongoDB connection
 const uri = process.env.MONGO_URI;
 if (!uri) {
-  console.error('❌ MONGO_URI is missing. Check your .env file.');
+  console.error(' MONGO_URI is missing. Check your .env file.');
   process.exit(1);
 }
 
@@ -72,23 +72,23 @@ const PORT = process.env.PORT || 5000;
 
 mongoose.connect(uri)
   .then(() => {
-    console.log('✅ Connected to MongoDB Atlas');
+    console.log(' Connected to MongoDB Atlas');
     server.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(` Server running on http://localhost:${PORT}`);
     });
   })
   .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
+    console.error(' MongoDB connection error:', err.message);
     process.exit(1);
   });
 
 mongoose.connection.on('error', err => {
-  console.error('❌ MongoDB runtime error:', err.message);
+  console.error(' MongoDB runtime error:', err.message);
 });
 
 mongoose.set('debug', true);
 
-// 🔐 Google OAuth callback route
+// Google OAuth callback route
 app.get('/api/auth/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/api/auth/google/failure'
@@ -98,7 +98,7 @@ app.get('/api/auth/google/callback',
       const user = req.user;
 
       if (!user) {
-        console.error('❌ No user returned from Passport');
+        console.error(' No user returned from Passport');
         return res.redirect('http://localhost:3000/oauth-failure');
       }
 
@@ -130,13 +130,13 @@ app.get('/api/auth/google/callback',
 
       res.redirect(redirectUrl.toString());
     } catch (err) {
-      console.error('🔥 Google OAuth callback error:', err.message);
+      console.error(' Google OAuth callback error:', err.message);
       res.redirect('http://localhost:3000/oauth-failure');
     }
   }
 );
 
-// 🧪 Debug route
+// Debug route
 const { auth } = require('./middleware/auth');
 const User = require('./models/User');
 
@@ -150,17 +150,16 @@ app.get('/api/debug/profile/:id', auth, async (req, res) => {
   }
 });
 
-// 📡 Socket.IO events
+//  Socket.IO events
 io.on('connection', (socket) => {
-  console.log('🔌 New client connected:', socket.id);
+  console.log(' New client connected:', socket.id);
 
-  // Example: join room by userId for targeted notifications
   socket.on('join', (userId) => {
     socket.join(userId);
-    console.log(`👤 User ${userId} joined their room`);
+    console.log(` User ${userId} joined their room`);
   });
 
   socket.on('disconnect', () => {
-    console.log('❌ Client disconnected:', socket.id);
+    console.log(' Client disconnected:', socket.id);
   });
 });

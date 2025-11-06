@@ -1,6 +1,6 @@
 const Notification = require('../models/Notification');
 
-// 📌 Get all notifications for logged-in user
+//  Get all notifications for logged-in user
 const getNotifications = async (req, res) => {
   try {
     let query = {};
@@ -17,12 +17,12 @@ const getNotifications = async (req, res) => {
 
     res.json(notifications);
   } catch (err) {
-    console.error('❌ Fetch notifications error:', err.message);
+    console.error(' Fetch notifications error:', err.message);
     res.status(500).json({ error: 'Failed to fetch notifications' });
   }
 };
 
-// 📌 Get unread notification count
+//  Get unread notification count
 const getUnreadCount = async (req, res) => {
   try {
     let query = { read: false };
@@ -36,12 +36,12 @@ const getUnreadCount = async (req, res) => {
     const count = await Notification.countDocuments(query);
     res.json({ unreadCount: count });
   } catch (err) {
-    console.error('❌ Unread count error:', err.message);
+    console.error(' Unread count error:', err.message);
     res.status(500).json({ error: 'Failed to count unread notifications' });
   }
 };
 
-// 📌 Mark one notification as read
+// Mark one notification as read
 const markAsRead = async (req, res) => {
   try {
     const updated = await Notification.findOneAndUpdate(
@@ -52,12 +52,12 @@ const markAsRead = async (req, res) => {
     if (!updated) return res.status(404).json({ error: 'Notification not found' });
     res.json({ message: 'Notification marked as read' });
   } catch (err) {
-    console.error('❌ Mark as read error:', err.message);
+    console.error(' Mark as read error:', err.message);
     res.status(500).json({ error: 'Failed to update notification' });
   }
 };
 
-// 📌 Mark all notifications as read
+//  Mark all notifications as read
 const markAllAsRead = async (req, res) => {
   try {
     let query = { read: false };
@@ -71,7 +71,7 @@ const markAllAsRead = async (req, res) => {
     await Notification.updateMany(query, { $set: { read: true } });
     res.json({ message: 'All notifications marked as read' });
   } catch (err) {
-    console.error('❌ Mark all error:', err.message);
+    console.error(' Mark all error:', err.message);
     res.status(500).json({ error: 'Failed to update notifications' });
   }
 };

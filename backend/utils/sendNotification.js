@@ -12,7 +12,7 @@ const sendNotification = async ({ userId, type = 'appointment', status, message,
       read: false
     });
 
-    // If using Socket.IO, emit to the user’s room
+  
     if (global.io) {
       if (recipientType === 'admin') {
         global.io.emit('adminNotification', notification);
@@ -21,7 +21,7 @@ const sendNotification = async ({ userId, type = 'appointment', status, message,
       }
     }
   } catch (err) {
-    console.error('❌ Notification error:', err.message);
+    console.error(' Notification error:', err.message);
   }
 };
 

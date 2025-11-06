@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import './AdminProfile.css';
+import './Style/AdminProfile.css';
 import { FaCamera } from 'react-icons/fa';
 
 export default function AdminProfile() {
@@ -35,7 +35,7 @@ export default function AdminProfile() {
 
   try {
     const formData = new FormData();
-    formData.append('avatar', file); // ✅ must match multer field name
+    formData.append('avatar', file);
 
     const token = localStorage.getItem('token');
     const res = await axios.post('http://localhost:5000/api/profile/avatar', formData, {
@@ -49,7 +49,7 @@ export default function AdminProfile() {
       setAdmin((prev) => ({ ...prev, avatar: res.data.avatar }));
     }
   } catch (err) {
-    console.error('❌ Avatar upload failed:', err);
+    console.error(' Avatar upload failed:', err);
   } finally {
     setUploading(false);
   }

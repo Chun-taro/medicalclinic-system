@@ -124,16 +124,16 @@ const googleSignup = async (req, res) => {
       return res.status(400).json({ error: 'reCAPTCHA verification failed' });
     }
 
-    // ✅ Check if user already exists
+    //  Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // ✅ Hash password
+    //  Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Create new user
+    //  Create new user
     const newUser = new User({
       googleId,
       firstName,
@@ -159,7 +159,7 @@ const googleSignup = async (req, res) => {
 
     await newUser.save();
 
-    // ✅ Issue JWT
+    //  Issue JWT
     const token = jwt.sign(
       { userId: newUser._id, role: newUser.role },
       process.env.JWT_SECRET,
@@ -174,7 +174,7 @@ const googleSignup = async (req, res) => {
       googleId: newUser.googleId
     });
   } catch (err) {
-    console.error('❌ Google signup error:', err.message);
+    console.error(' Google signup error:', err.message);
     res.status(500).json({ error: 'Signup failed' });
   }
 };

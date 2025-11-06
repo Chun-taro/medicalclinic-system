@@ -5,7 +5,7 @@ export default function DashboardRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const role = localStorage.getItem('role'); // ✅ moved inside useEffect
+    const role = localStorage.getItem('role');
 
     if (role === 'admin') {
       navigate('/admin-dashboard');
@@ -14,7 +14,7 @@ export default function DashboardRedirect() {
     } else {
       navigate('/');
     }
-  }, [navigate]); // ✅ removed 'role' from dependency array
+  }, [navigate]); 
 
   return <p>Redirecting to your dashboard...</p>;
 }

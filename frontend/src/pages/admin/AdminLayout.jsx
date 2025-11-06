@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './AdminDashboard.css';
+import './Style/AdminDashboard.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -33,31 +33,29 @@ export default function AdminLayout({ children }) {
     navigate('/', { replace: true });
   };
 
+  // fetch unread notifications
+  const fetchUnreadCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/notifications/unread', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setUnreadCount(data.unreadCount); // 👈 same as patient
+    } catch (err) {
+      console.error('Error fetching unread notifications:', err);
+    }
+  };
+
   useEffect(() => {
+    fetchUnreadCount();
+
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
       }
     };
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/notifications/unread', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) setUnreadCount(data.count);
-      } catch (err) {
-        console.error('Error fetching unread notifications:', err);
-      }
-    };
-
-    fetchUnreadCount();
 
     const socket = io('http://localhost:5000');
     socket.on('newAppointment', (data) => {
@@ -65,7 +63,10 @@ export default function AdminLayout({ children }) {
       setUnreadCount((prev) => prev + 1);
     });
 
-    return () => socket.disconnect();
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      socket.disconnect();
+    };
   }, []);
 
   const getInitials = (first, last) =>
@@ -107,11 +108,11 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="navbar-right">
-            {/* ✅ Notification Bell */}
-            <div className="notification-bell" onClick={() => navigate('/admin-notifications')}>
-              <Bell className="bell-icon" />
+            {/* 🔔 Notification Bell copied from PatientLayout */}
+            <div className="notification-wrapper" onClick={() => navigate('/admin-notifications')}>
+              <Bell className="notification-icon" />
               {unreadCount > 0 && (
-                <span className="notification-count">{unreadCount}</span>
+                <span className="notification-badge">{unreadCount}</span>
               )}
             </div>
 

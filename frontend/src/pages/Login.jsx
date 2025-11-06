@@ -1,4 +1,4 @@
-import './Auth.css';
+import './Style/Auth.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -75,8 +75,33 @@ export default function Login() {
             <h2 className="clinic-title">BukSU<br />Medical Clinic</h2>
             <hr className="form-divider" />
           </div>
+
+<input
+  type="text"
+  placeholder="Email or phone number"
+  value={form.email}
+  onChange={e => setForm({ ...form, email: e.target.value })}
+/>
+
+<input
+  type="password"
+  placeholder="Password"
+  value={form.password}
+  onChange={e => setForm({ ...form, password: e.target.value })}
+/>
+
+<div className="recaptcha-container">
+  <Recaptcha
+    onVerify={handleRecaptchaVerify}
+    onExpire={handleRecaptchaExpire}
+  />
+  {recaptchaError && <p className="recaptcha-error">{recaptchaError}</p>}
+</div>
+
+<button onClick={handleLogin}>Continue →</button>
+
 <p className="google-label">Continue with Google</p>
-          <a href="http://localhost:5000/api/auth/google" style={{ textDecoration: "none" }}>
+<a href="http://localhost:5000/api/auth/google" style={{ textDecoration: "none" }}>
   <button
     style={{
       border: "none",
@@ -95,37 +120,14 @@ export default function Login() {
     />
   </button>
 </a>
-          <input
-            type="text"
-            placeholder="Email or phone number"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-          />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
-          />
+<p>
+  Don't have an account? <span onClick={() => navigate('/signup')}>Register here</span>
+</p>
 
-          <div className="recaptcha-container">
-            <Recaptcha
-              onVerify={handleRecaptchaVerify}
-              onExpire={handleRecaptchaExpire}
-            />
-            {recaptchaError && <p className="recaptcha-error">{recaptchaError}</p>}
-          </div>
-
-          <button onClick={handleLogin}>Continue →</button>
-
-          <p>
-            Don't have an account? <span onClick={() => navigate('/signup')}>Register here</span>
-          </p>
-
-          <p className="forgot-password">
-            <span onClick={() => navigate('/forgot-password')}>Forgot Password?</span>
-          </p>
+<p className="forgot-password">
+  <span onClick={() => navigate('/forgot-password')}>Forgot Password?</span>
+</p>
         </div>
       </div>
     </div>

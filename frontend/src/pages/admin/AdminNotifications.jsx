@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from './AdminLayout';
-import './AdminNotifications.css';
+import './Style/AdminNotifications.css';
 
 export default function AdminNotifications() {
   const [notifications, setNotifications] = useState([]);
@@ -28,7 +28,7 @@ export default function AdminNotifications() {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchNotifications(); // refresh list
+      fetchNotifications();
     } catch (err) {
       console.error('Error marking as read:', err);
     }

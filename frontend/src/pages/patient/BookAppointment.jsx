@@ -17,7 +17,7 @@ export default function BookAppointment() {
   const [form, setForm] = useState(initialFormState);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fetch user profile and pre-fill form
+  //  Fetch user profile and pre-fill form
   useEffect(() => {
     const fetchProfile = async () => {
       try {

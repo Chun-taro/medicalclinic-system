@@ -3,7 +3,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import './admindashboard1.css';
+import './Style/admindashboard1.css';
 
 export default function AdminDashboard() {
   const [appointments, setAppointments] = useState([]);

@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const http = require('http');
 const socketIo = require('socket.io');
 
-// Routes
+// Route imports
 const authRoutes = require('./routes/auth');
 const appointmentRoutes = require('./routes/appointments');
 const profileRoutes = require('./routes/profile');
@@ -17,24 +17,23 @@ const resetRoutes = require('./routes/reset');
 const medicineRoutes = require('./routes/medicines');
 const notificationRoutes = require('./routes/notification');
 
-
 require('./passport');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: '*' } });
 
-//  Inject io into every request (so controllers can emit events)
+// Inject Socket.IO into every request
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-//  Middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-//  Session
+// Session setup
 app.use(session({
   secret: process.env.SESSION_SECRET || 'MySecretKey',
   resave: false,
@@ -45,23 +44,23 @@ app.use(session({
   }
 }));
 
-//  Passport
+// Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
 
-//  Static file serving
+// Static file serving
 app.use('/uploads', express.static('uploads'));
 
-//  Routes
+// Route mounting
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reset', resetRoutes);
-app.use('/api/medicines', medicineRoutes);
+app.use('/api/medicines', medicineRoutes); 
 app.use('/api/notifications', notificationRoutes);
 
-//  MongoDB connection
+// MongoDB connection
 const uri = process.env.MONGO_URI;
 if (!uri) {
   console.error(' MONGO_URI is missing. Check your .env file.');
@@ -74,7 +73,7 @@ mongoose.connect(uri)
   .then(() => {
     console.log(' Connected to MongoDB Atlas');
     server.listen(PORT, () => {
-      console.log(` Server running on http://localhost:${PORT}`);
+      console.log(` Server running at http://localhost:${PORT}`);
     });
   })
   .catch(err => {
@@ -88,7 +87,7 @@ mongoose.connection.on('error', err => {
 
 mongoose.set('debug', true);
 
-// Google OAuth callback route
+// Google OAuth callback
 app.get('/api/auth/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/api/auth/google/failure'
@@ -96,7 +95,6 @@ app.get('/api/auth/google/callback',
   async (req, res) => {
     try {
       const user = req.user;
-
       if (!user) {
         console.error(' No user returned from Passport');
         return res.redirect('http://localhost:3000/oauth-failure');
@@ -150,7 +148,7 @@ app.get('/api/debug/profile/:id', auth, async (req, res) => {
   }
 });
 
-//  Socket.IO events
+// Socket.IO events
 io.on('connection', (socket) => {
   console.log(' New client connected:', socket.id);
 

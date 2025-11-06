@@ -223,6 +223,30 @@ const completeConsultation = async (req, res) => {
   }
 };
 
+const saveConsultation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { diagnosis, management, medicinesPrescribed } = req.body;
+
+    const appointment = await Appointment.findById(id);
+    if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
+
+    appointment.diagnosis = diagnosis;
+    appointment.management = management;
+    appointment.medicinesPrescribed = medicinesPrescribed;
+    appointment.status = 'completed';
+    appointment.consultationCompletedAt = new Date();
+
+    await appointment.save();
+
+    res.json({ message: 'Consultation saved', appointment });
+  } catch (err) {
+    console.error('Save consultation error:', err.message);
+    res.status(500).json({ error: 'Failed to save consultation' });
+  }
+};
+
+
 //  Delete appointment
 const deleteAppointment = async (req, res) => {
   try {
@@ -235,7 +259,7 @@ const deleteAppointment = async (req, res) => {
 
     res.json({ message: 'Appointment deleted successfully' });
   } catch (err) {
-    console.error(' Delete error:', err.message);
+    console.error('❌ Delete error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -387,5 +411,6 @@ module.exports = {
   generateReports,
   getConsultations,
   getConsultationById,
-  updateAppointment 
+  updateAppointment,
+  saveConsultation 
 };

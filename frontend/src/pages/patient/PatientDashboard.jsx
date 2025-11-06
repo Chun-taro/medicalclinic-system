@@ -14,7 +14,7 @@ export default function PatientDashboard() {
       const userId = localStorage.getItem('userId');
       const token = localStorage.getItem('token');
       const role = localStorage.getItem('role');
-      
+        
 
       if (!userId || !token) {
         setError('Missing user credentials. Please log in again.');

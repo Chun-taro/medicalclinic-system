@@ -11,7 +11,8 @@ const {
   generateReports,
   getConsultations,
   getConsultationById,
-  updateAppointment 
+  updateAppointment,
+  saveConsultation
 } = require('../controllers/appointmentController');
 
 const { auth } = require('../middleware/auth');
@@ -29,10 +30,12 @@ router.get('/', auth, getAllAppointments);
 router.delete('/:id', auth, deleteAppointment);
 router.patch('/:id', auth, updateAppointment); 
 router.patch('/:id/approve', auth, approveAppointment);
+ 
 
 //  Consultation routes
 router.patch('/:id/start', auth, startConsultation);
 router.patch('/:id/complete', auth, completeConsultation);
+router.patch('/:id/consultation', auth, saveConsultation);
 
 //  Reporting and analytics
 router.get('/reports', auth, generateReports);

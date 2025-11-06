@@ -18,9 +18,9 @@ const createMedicine = async (req, res) => {
     const { name, quantityInStock, boxesInStock, capsulesPerBox, unit, expiryDate } = req.body;
 
     const expiry = new Date(expiryDate);
-    const startOfDay = new Date(expiry); 
+    const startOfDay = new Date(expiry);
     startOfDay.setUTCHours(0, 0, 0, 0);
-    const endOfDay = new Date(expiry); 
+    const endOfDay = new Date(expiry);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
     const existing = await Medicine.findOne({
@@ -53,35 +53,32 @@ const createMedicine = async (req, res) => {
   }
 };
 
-// Dispense capsules
+// ✅ Dispense capsules using :id from route
 const dispenseCapsules = async (req, res) => {
   try {
-    const { medicineId, capsulesToDispense } = req.body;
-    const med = await Medicine.findById(medicineId);
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    const med = await Medicine.findById(id);
     if (!med) return res.status(404).json({ error: 'Medicine not found' });
 
-    // Calculate total available capsules (loose + in boxes)
-    const totalAvailableCapsules = med.quantityInStock + (med.boxesInStock * med.capsulesPerBox);
-    if (totalAvailableCapsules < capsulesToDispense) {
+    const totalAvailable = med.quantityInStock + (med.boxesInStock * med.capsulesPerBox);
+    if (totalAvailable < quantity) {
       return res.status(400).json({ error: 'Not enough stock to dispense' });
     }
 
-    // If we need to open boxes
-    if (med.quantityInStock < capsulesToDispense) {
-      // Calculate how many boxes we need to open
-      const additionalCapsulesNeeded = capsulesToDispense - med.quantityInStock;
-      const boxesToOpen = Math.ceil(additionalCapsulesNeeded / med.capsulesPerBox);
-      
-      // Open the boxes
+    if (med.quantityInStock < quantity) {
+      const needed = quantity - med.quantityInStock;
+      const boxesToOpen = Math.ceil(needed / med.capsulesPerBox);
       med.boxesInStock -= boxesToOpen;
-      med.quantityInStock += (boxesToOpen * med.capsulesPerBox);
+      med.quantityInStock += boxesToOpen * med.capsulesPerBox;
     }
 
-    // Now deduct the capsules
-    med.quantityInStock -= capsulesToDispense;
+    med.quantityInStock -= quantity;
     med.available = med.quantityInStock > 0 || med.boxesInStock > 0;
     await med.save();
-    res.json(med);
+
+    res.json({ message: 'Medicine dispensed', medicine: med });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -106,24 +103,18 @@ const deductMedicines = async (req, res) => {
         continue;
       }
 
-      // Calculate total available capsules (loose + in boxes)
-      const totalAvailableCapsules = med.quantityInStock + (med.boxesInStock * med.capsulesPerBox);
-      if (totalAvailableCapsules < qty) {
+      const totalAvailable = med.quantityInStock + (med.boxesInStock * med.capsulesPerBox);
+      if (totalAvailable < qty) {
         return res.status(400).json({ error: `Not enough stock for ${med.name}` });
       }
 
-      // If we need to open boxes
       if (med.quantityInStock < qty) {
-        // Calculate how many boxes we need to open
-        const additionalCapsulesNeeded = qty - med.quantityInStock;
-        const boxesToOpen = Math.ceil(additionalCapsulesNeeded / med.capsulesPerBox);
-        
-        // Open the boxes
+        const needed = qty - med.quantityInStock;
+        const boxesToOpen = Math.ceil(needed / med.capsulesPerBox);
         med.boxesInStock -= boxesToOpen;
-        med.quantityInStock += (boxesToOpen * med.capsulesPerBox);
+        med.quantityInStock += boxesToOpen * med.capsulesPerBox;
       }
 
-      // Now deduct the capsules
       med.quantityInStock -= qty;
       med.available = med.quantityInStock > 0 || med.boxesInStock > 0;
       await med.save();
@@ -139,13 +130,11 @@ const deductMedicines = async (req, res) => {
 // Delete medicine
 const deleteMedicine = async (req, res) => {
   try {
-    // Auth: expect Authorization: Bearer <token>
     const authHeader = req.headers.authorization || '';
     const token = authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'No token provided' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // optional: restrict to admin role
     if (decoded.role && decoded.role !== 'admin') {
       return res.status(403).json({ message: 'Insufficient permissions' });
     }

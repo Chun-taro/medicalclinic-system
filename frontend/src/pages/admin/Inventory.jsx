@@ -16,6 +16,10 @@ export default function Inventory() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  //  Modal state
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [dispenseHistory, setDispenseHistory] = useState([]);
+
   const fetchInventory = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -28,6 +32,20 @@ export default function Inventory() {
       setError('Failed to load inventory.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDispenseHistory = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/medicines/history', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDispenseHistory(res.data);
+      setShowHistoryModal(true);
+    } catch (err) {
+      console.error('Error fetching dispense history:', err.message);
+      setError('Failed to load dispense history.');
     }
   };
 
@@ -118,69 +136,33 @@ export default function Inventory() {
         <h2>Medicine Inventory</h2>
         <p>Track capsules and expiry dates. Dispense to walk-in patients.</p>
 
+        {/*  View History Button */}
+        <button className="history-btn" onClick={fetchDispenseHistory}>
+          View Dispense History
+        </button>
+
         {/* Add Medicine */}
-<form className="medicine-form" onSubmit={handleSubmit}>
-  <input
-    type="text"
-    name="name"
-    placeholder="Medicine Name"
-    value={form.name}
-    onChange={handleChange}
-    required
-  />
-  <input
-    type="number"
-    name="quantityInStock"
-    placeholder="Capsules in Stock"
-    value={form.quantityInStock}
-    onChange={handleChange}
-    required
-    min="0"
-  />
-  <input
-    type="text"
-    name="unit"
-    placeholder="Unit (e.g. pcs, bottles)"
-    value={form.unit}
-    onChange={handleChange}
-    required
-  />
-  <input
-    type="date"
-    name="expiryDate"
-    value={form.expiryDate}
-    onChange={handleChange}
-  />
-  <button type="submit" disabled={submitting}>
-    {submitting ? 'Adding...' : 'Add Medicine'}
-  </button>
-</form>
+        <form className="medicine-form" onSubmit={handleSubmit}>
+          <input type="text" name="name" placeholder="Medicine Name" value={form.name} onChange={handleChange} required />
+          <input type="number" name="quantityInStock" placeholder="Capsules in Stock" value={form.quantityInStock} onChange={handleChange} required min="0" />
+          <input type="text" name="unit" placeholder="Unit (e.g. pcs, bottles)" value={form.unit} onChange={handleChange} required />
+          <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange} />
+          <button type="submit" disabled={submitting}>{submitting ? 'Adding...' : 'Add Medicine'}</button>
+        </form>
 
-{/* Dispense Medicine */}
-<form className="dispense-form" onSubmit={handleDispense}>
-  <select
-    value={dispenseForm.medId}
-    onChange={e => setDispenseForm({ ...dispenseForm, medId: e.target.value })}
-    required
-  >
-    <option value="">Select Medicine</option>
-    {medicines.map(med => (
-      <option key={med._id} value={med._id}>
-        {med.name} ({med.quantityInStock} left)
-      </option>
-    ))}
-  </select>
-  <input
-    type="number"
-    placeholder="Quantity to dispense"
-    value={dispenseForm.quantity}
-    onChange={e => setDispenseForm({ ...dispenseForm, quantity: e.target.value })}
-    required
-    min="1"
-  />
-  <button type="submit">Dispense</button>
-</form>
-
+        {/* Dispense Medicine */}
+        <form className="dispense-form" onSubmit={handleDispense}>
+          <select value={dispenseForm.medId} onChange={e => setDispenseForm({ ...dispenseForm, medId: e.target.value })} required>
+            <option value="">Select Medicine</option>
+            {medicines.map(med => (
+              <option key={med._id} value={med._id}>
+                {med.name} ({med.quantityInStock} left)
+              </option>
+            ))}
+          </select>
+          <input type="number" placeholder="Quantity to dispense" value={dispenseForm.quantity} onChange={e => setDispenseForm({ ...dispenseForm, quantity: e.target.value })} required min="1" />
+          <button type="submit">Dispense</button>
+        </form>
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
@@ -209,14 +191,48 @@ export default function Inventory() {
                   <td>{med.expiryDate ? new Date(med.expiryDate).toLocaleDateString() : '—'}</td>
                   <td className={getStatus(med).toLowerCase()}>{getStatus(med)}</td>
                   <td>
-                    <button onClick={() => handleDelete(med._id)} className="delete-btn">
-                      Delete
-                    </button>
+                    <button onClick={() => handleDelete(med._id)} className="delete-btn">Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        )}
+
+        {/* Modal for Dispense History */}
+        {showHistoryModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>Dispense History</h3>
+              <button className="close-btn" onClick={() => setShowHistoryModal(false)}>Close</button>
+              {dispenseHistory.length === 0 ? (
+                <p>No dispense records found.</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table className="history-table">
+                   <thead>
+  <tr>
+    <th>Medicine</th>
+    <th>Quantity</th>
+    <th>Dispensed At</th>
+    <th>Source</th> 
+  </tr>
+</thead>
+<tbody>
+  {dispenseHistory.map((record, index) => (
+    <tr key={index}>
+      <td>{record.medicineName}</td>
+      <td>{record.quantity}</td>
+      <td>{new Date(record.dispensedAt).toLocaleString()}</td>
+      <td>{record.source === 'consultation' ? 'Consultation' : 'Manual Dispense'}</td> 
+    </tr>
+  ))}
+</tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </AdminLayout>

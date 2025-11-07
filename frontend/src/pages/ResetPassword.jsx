@@ -38,7 +38,7 @@ export default function ResetPassword() {
           />
           <button onClick={handleReset}>Reset Password</button>
 
-          {/* ✅ Back to Login link */}
+          {/*  Back to Login link */}
           <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem', color: '#555' }}>
             <span
               onClick={() => navigate('/')}

@@ -53,11 +53,11 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem 1.5rem; /* Row and column spacing */
+  gap: 1.25rem 1.5rem; 
   align-items: start;
 }
 
-/* Make full-width fields span both columns */
+
 .doctor-form textarea,
 .doctor-form input[type="date"],
 .doctor-form input[name="address"],
@@ -78,7 +78,7 @@
   background-color: #f9fafb;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
   resize: none;
-  box-sizing: border-box; /* Prevents layout shifts */
+  box-sizing: border-box; 
 }
 
 .doctor-form input:focus,
@@ -134,7 +134,7 @@
   }
 
   .doctor-form {
-    grid-template-columns: 1fr; /* Stack fields vertically */
+    grid-template-columns: 1fr; 
     gap: 1rem;
   }
 

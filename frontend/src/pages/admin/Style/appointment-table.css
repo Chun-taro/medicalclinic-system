@@ -88,9 +88,9 @@
 
 /* Pending Tab - orange colors */
 .tab.pending {
-  background-color: #fef3c7; /* Light amber background */
-  color: #b45309;            /* Dark amber text */
-  border-color: #fbbf24;     /* Amber border */
+  background-color: #fef3c7; 
+  color: #b45309;            
+  border-color: #fbbf24;     
 }
 
 .tab.pending:hover {
@@ -101,9 +101,9 @@
 
 /* Approved Tab - green colors */
 .tab.approved {
-  background-color: #d1fae5; /* Light green background */
-  color: #065f46;            /* Dark green text */
-  border-color: #34d399;     /* Green border */
+  background-color: #d1fae5; 
+  color: #065f46;            
+  border-color: #34d399;     
 }
 
 .tab.approved:hover {

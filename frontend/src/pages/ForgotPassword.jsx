@@ -2,7 +2,7 @@ import './Style/Auth.css';
 import { useState } from 'react';
 import axios from 'axios';
 import logo from './assets/logo.png';
-import backgroundImage from './assets/building.png'; // ✅ Local background
+import backgroundImage from './assets/building.png'; 
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');

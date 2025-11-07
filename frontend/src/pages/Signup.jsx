@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Recaptcha from '../components/Recaptcha';
-import backgroundImage from './assets/building.png'; // ✅ Local PNG image
+import backgroundImage from './assets/building.png'; 
 
 export default function Signup() {
   const [form, setForm] = useState({

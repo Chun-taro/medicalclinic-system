@@ -19,7 +19,7 @@ export default function OAuthSuccess() {
       localStorage.setItem('userId', userId);
       if (googleId) localStorage.setItem('googleId', googleId);
 
-      // ✅ Delay to ensure localStorage is committed before redirect
+      // Delay to ensure localStorage is committed before redirect
       setTimeout(() => {
         if (role === 'admin') {
           navigate('/admin-dashboard');
@@ -29,7 +29,7 @@ export default function OAuthSuccess() {
           console.warn('Unexpected role:', role);
           navigate('/unauthorized');
         }
-      }, 100); // 100ms delay
+      }, 100); 
     } else {
       console.warn('Missing OAuth params — redirecting to login');
       navigate('/login');

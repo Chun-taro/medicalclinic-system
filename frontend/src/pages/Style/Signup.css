@@ -17,9 +17,9 @@ body {
 /* Layout wrapper */
 .signup-wrapper {
   display: flex;
-  min-height: 100vh; /* ✅ allows full height but scrollable */
-  overflow: auto;     /* ✅ enables scrolling on mobile */
-  flex-direction: column; /* ✅ stack layout on small screens */
+  min-height: 100vh; 
+  overflow: auto;     
+  flex-direction: column; 
 }
 
 /* Left image section */

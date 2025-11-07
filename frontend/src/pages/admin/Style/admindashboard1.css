@@ -23,19 +23,19 @@
 /* Stats cards smaller & vertical alignment */
 .stats-grid {
   display: flex;
-  flex-direction: column; /* vertical stack */
-  gap: 0.6rem; /* smaller gap between cards */
+  flex-direction: column; 
+  gap: 0.6rem; 
 }
 
 .stat-card {
   background-color: #fff;
   border-radius: 12px;
-  padding: 0.4rem 0.7rem;   /* reduce vertical padding */
+  padding: 0.4rem 0.7rem;  
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   font-size: 0.85rem;
-  max-height:70px;     /* enforce shorter height */
-  overflow: hidden;         /* hide excess content if any */
+  max-height:70px;     
+  overflow: hidden;        
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -50,14 +50,14 @@
 }
 
 .stat-card h3 {
-  font-size: 0.75rem;         /* smaller heading */
+  font-size: 0.75rem;         
   margin-bottom: 0.2rem;
   font-weight: 500;
   color: #475569;
 }
 
 .stat-card p {
-  font-size: 1rem;           /* slightly smaller number */
+  font-size: 1rem;           
   font-weight: 700;
   margin: 0;
 }
@@ -99,18 +99,18 @@
 }
 
 .dashboard-left {
-  flex: 1;                /* stats column */
+  flex: 1;                
 }
 
 .dashboard-right {
-  flex:3;            /* make calendar section take more space */
+  flex:3;            
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
 .calendar-card {
-  flex: 1;                /* this makes the calendar‑card expand to fill available height */
+  flex: 1;                
   background-color: #fff;
   border-radius: 16px;
   padding: 1rem;
@@ -121,9 +121,9 @@
 /* Calendar tiles - square with gaps */
 .react-calendar__month-view__days__day,
 .react-calendar__tile {
-  border-radius: 6px !important; /* square with slight curve */
+  border-radius: 6px !important; 
   padding: 0.5rem 0;
-  margin: 3px; /* gap between tiles */
+  margin: 3px; 
   text-align: center;
   font-weight: 500;
   color: #334155;

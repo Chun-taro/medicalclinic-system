@@ -399,6 +399,41 @@ const updateAppointment = async (req, res) => {
   }
 };
 
+const Medicine = require('../models/Medicine');
+
+const prescribeMedicines = async (req, res) => {
+  const { id: consultationId } = req.params;
+  const { prescribed } = req.body;
+
+  if (!Array.isArray(prescribed) || prescribed.length === 0) {
+    return res.status(400).json({ error: 'No medicines prescribed' });
+  }
+
+  try {
+    for (const item of prescribed) {
+      const med = await Medicine.findById(item.medicineId);
+      if (!med || med.quantityInStock < item.quantity) continue;
+
+      med.quantityInStock -= item.quantity;
+      med.available = med.quantityInStock > 0;
+
+      med.dispenseHistory.push({
+        appointmentId: consultationId,
+        quantity: item.quantity,
+        dispensedBy: req.user.id,
+        dispensedAt: new Date()
+      });
+
+      await med.save();
+    }
+
+    res.json({ message: 'Prescription processed' });
+  } catch (err) {
+    console.error('Prescription error:', err.message);
+    res.status(500).json({ error: 'Failed to process prescription' });
+  }
+};
+
 module.exports = {
   bookAppointment,
   getPatientAppointments,
@@ -412,5 +447,6 @@ module.exports = {
   getConsultations,
   getConsultationById,
   updateAppointment,
-  saveConsultation 
+  saveConsultation,
+  prescribeMedicines
 };

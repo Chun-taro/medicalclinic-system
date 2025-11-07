@@ -9,13 +9,19 @@ const medicineSchema = new mongoose.Schema({
   strength: String,
 
   quantityInStock: { type: Number, default: 0 },
-  boxesInStock: { type: Number, default: 0 },
-  capsulesPerBox: { type: Number, default: 0 },
-
   unit: String,
   expiryDate: Date,
   available: { type: Boolean, default: true },
-  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+  dispenseHistory: [
+    {
+      appointmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' },
+      quantity: Number,
+      dispensedAt: { type: Date, default: Date.now },
+      dispensedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Medicine', medicineSchema);

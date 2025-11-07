@@ -15,7 +15,11 @@ const getAllMedicines = async (req, res) => {
 // Create new medicine
 const createMedicine = async (req, res) => {
   try {
-    const { name, quantityInStock, boxesInStock, capsulesPerBox, unit, expiryDate } = req.body;
+    const { name, quantityInStock, unit, expiryDate } = req.body;
+
+    if (!name || !quantityInStock || !unit || !expiryDate) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
     const expiry = new Date(expiryDate);
     const startOfDay = new Date(expiry);
@@ -30,8 +34,7 @@ const createMedicine = async (req, res) => {
 
     if (existing) {
       existing.quantityInStock += parseInt(quantityInStock);
-      existing.boxesInStock += parseInt(boxesInStock);
-      existing.available = existing.quantityInStock > 0 || existing.boxesInStock > 0;
+      existing.available = existing.quantityInStock > 0;
       await existing.save();
       return res.status(200).json(existing);
     }
@@ -39,43 +42,58 @@ const createMedicine = async (req, res) => {
     const newMedicine = new Medicine({
       name,
       quantityInStock: parseInt(quantityInStock),
-      boxesInStock: parseInt(boxesInStock),
-      capsulesPerBox: parseInt(capsulesPerBox),
       unit,
       expiryDate: expiry,
-      available: parseInt(quantityInStock) > 0 || parseInt(boxesInStock) > 0
+      available: parseInt(quantityInStock) > 0
     });
 
     await newMedicine.save();
     res.status(201).json(newMedicine);
   } catch (err) {
+    console.error('Create medicine error:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// ✅ Dispense capsules using :id from route
+// Dispense capsules using :id
 const dispenseCapsules = async (req, res) => {
   try {
     const { id } = req.params;
-    const { quantity } = req.body;
+    const { quantity, appointmentId } = req.body;
 
     const med = await Medicine.findById(id);
     if (!med) return res.status(404).json({ error: 'Medicine not found' });
 
-    const totalAvailable = med.quantityInStock + (med.boxesInStock * med.capsulesPerBox);
-    if (totalAvailable < quantity) {
+    if (med.quantityInStock < quantity) {
       return res.status(400).json({ error: 'Not enough stock to dispense' });
     }
 
-    if (med.quantityInStock < quantity) {
-      const needed = quantity - med.quantityInStock;
-      const boxesToOpen = Math.ceil(needed / med.capsulesPerBox);
-      med.boxesInStock -= boxesToOpen;
-      med.quantityInStock += boxesToOpen * med.capsulesPerBox;
+    med.quantityInStock -= quantity;
+    med.available = med.quantityInStock > 0;
+
+    // Extract user ID from token
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.split(' ')[1];
+    let userId = null;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.id;
+      } catch (err) {
+        console.warn('Token decode failed:', err.message);
+      }
     }
 
-    med.quantityInStock -= quantity;
-    med.available = med.quantityInStock > 0 || med.boxesInStock > 0;
+    // Log dispense history
+    med.dispenseHistory = med.dispenseHistory || [];
+    med.dispenseHistory.push({
+      appointmentId: appointmentId ? new mongoose.Types.ObjectId(appointmentId) : null,
+      quantity,
+      dispensedBy: userId ? new mongoose.Types.ObjectId(userId) : null,
+      dispensedAt: new Date(),
+      source: appointmentId ? 'consultation' : 'manual' 
+    });
+
     await med.save();
 
     res.json({ message: 'Medicine dispensed', medicine: med });
@@ -84,13 +102,25 @@ const dispenseCapsules = async (req, res) => {
   }
 };
 
-// Deduct multiple medicines
+// Deduct multiple medicines (used in consultation)
 const deductMedicines = async (req, res) => {
   try {
     const { prescribed } = req.body;
 
     if (!Array.isArray(prescribed)) {
       return res.status(400).json({ error: 'Invalid prescribed list' });
+    }
+
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.split(' ')[1];
+    let userId = null;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.id;
+      } catch (err) {
+        console.warn('Token decode failed:', err.message);
+      }
     }
 
     for (const item of prescribed) {
@@ -103,20 +133,22 @@ const deductMedicines = async (req, res) => {
         continue;
       }
 
-      const totalAvailable = med.quantityInStock + (med.boxesInStock * med.capsulesPerBox);
-      if (totalAvailable < qty) {
+      if (med.quantityInStock < qty) {
         return res.status(400).json({ error: `Not enough stock for ${med.name}` });
       }
 
-      if (med.quantityInStock < qty) {
-        const needed = qty - med.quantityInStock;
-        const boxesToOpen = Math.ceil(needed / med.capsulesPerBox);
-        med.boxesInStock -= boxesToOpen;
-        med.quantityInStock += boxesToOpen * med.capsulesPerBox;
-      }
-
       med.quantityInStock -= qty;
-      med.available = med.quantityInStock > 0 || med.boxesInStock > 0;
+      med.available = med.quantityInStock > 0;
+
+      med.dispenseHistory = med.dispenseHistory || [];
+      med.dispenseHistory.push({
+        appointmentId: item.appointmentId ? new mongoose.Types.ObjectId(item.appointmentId) : null,
+        quantity: qty,
+        dispensedBy: userId ? new mongoose.Types.ObjectId(userId) : null,
+        dispensedAt: new Date(),
+        source: 'consultation' 
+      });
+
       await med.save();
     }
 
@@ -157,10 +189,64 @@ const deleteMedicine = async (req, res) => {
   }
 };
 
+// Get dispense history for a specific medicine
+const getDispenseHistory = async (req, res) => {
+  try {
+    const med = await Medicine.findById(req.params.id)
+      .populate('dispenseHistory.appointmentId', 'firstName lastName appointmentDate')
+      .populate('dispenseHistory.dispensedBy', 'name');
+
+    if (!med) return res.status(404).json({ error: 'Medicine not found' });
+
+    res.json(med.dispenseHistory);
+  } catch (err) {
+    console.error('Dispense history error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch history' });
+  }
+};
+
+// Get all dispense history across medicines
+const getAllDispenseHistory = async (req, res) => {
+  try {
+    const medicines = await Medicine.find({}, 'name dispenseHistory')
+      .populate('dispenseHistory.appointmentId', 'firstName lastName appointmentDate')
+      .populate('dispenseHistory.dispensedBy', 'name');
+
+    const allHistory = [];
+
+    medicines.forEach(med => {
+      med.dispenseHistory.forEach(record => {
+        const sourceLabel =
+          record.source === 'consultation'
+            ? 'Consultation Dispense'
+            : record.source === 'manual'
+            ? 'Manual Dispense'
+            : 'Unknown';
+
+        allHistory.push({
+          medicineName: med.name,
+          quantity: record.quantity,
+          dispensedAt: record.dispensedAt,
+          dispensedBy: record.dispensedBy,
+          appointmentId: record.appointmentId,
+          source: sourceLabel 
+        });
+      });
+    });
+
+    res.json(allHistory);
+  } catch (err) {
+    console.error('Global dispense history error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch global history' });
+  }
+};
+
 module.exports = {
   getAllMedicines,
   createMedicine,
   dispenseCapsules,
   deductMedicines,
-  deleteMedicine
+  deleteMedicine,
+  getDispenseHistory,
+  getAllDispenseHistory
 };

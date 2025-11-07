@@ -49,11 +49,11 @@
 }
 
 .role-admin {
-  background-color: #1E90FF; /* Blue for admin */
+  background-color: #1E90FF; 
 }
 
 .role-patient {
-  background-color: #32CD32; /* Green for patient */
+  background-color: #32CD32; 
 }
 
 /* Style select dropdown */

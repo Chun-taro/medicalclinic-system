@@ -5,15 +5,17 @@ const {
   createMedicine,
   dispenseCapsules,
   deductMedicines,
-  deleteMedicine
+  deleteMedicine,
+  getDispenseHistory ,
+  getAllDispenseHistory
 } = require('../controllers/medicineController');
 
 router.get('/', getAllMedicines);
 router.post('/', createMedicine);
 router.post('/deduct', deductMedicines);
 router.delete('/:id', deleteMedicine);
-
-// Dispense route using :id
 router.post('/:id/dispense', dispenseCapsules);
+router.get('/:id/history', getDispenseHistory);
+router.get('/history', getAllDispenseHistory); 
 
 module.exports = router;

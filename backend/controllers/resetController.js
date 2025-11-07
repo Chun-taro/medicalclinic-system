@@ -17,8 +17,8 @@ const sendResetToken = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: 'michaelangeloangeles0@gmail.com',
-        pass: 'lzwg hzev hkgo lver' // Gmail App Password
+        user: 'buksumedicalclinic@gmail.com',
+      pass: 'oavd eamw mppk pepu'
       }
     });
 

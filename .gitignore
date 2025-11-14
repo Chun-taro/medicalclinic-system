@@ -1,8 +1,11 @@
-# Node modules
+# Node modules (backend & frontend)
 node_modules/
 
-# Environment variables
+# Environment files (root, backend, frontend)
 .env
+backend/.env
+frontend/.env
+**/.env
 
 # Logs
 *.log
@@ -15,6 +18,10 @@ npm-debug.log*
 # Build artifacts
 dist/
 build/
+frontend/build/
 
 # Coverage reports
 coverage/
+
+# Temporary files
+tmp/

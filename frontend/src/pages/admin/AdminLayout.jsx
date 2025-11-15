@@ -108,7 +108,7 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="navbar-right">
-            {/* 🔔 Notification Bell copied from PatientLayout */}
+            {/* Notification Bell */}
             <div className="notification-wrapper" onClick={() => navigate('/admin-notifications')}>
               <Bell className="notification-icon" />
               {unreadCount > 0 && (

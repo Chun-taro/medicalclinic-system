@@ -1,4 +1,6 @@
 const Notification = require('../models/Notification');
+const User = require('../models/User');
+const { createEvent } = require('../services/calendarService');
 
 // Get all notifications for logged-in user
 const getNotifications = async (req, res) => {
@@ -70,9 +72,47 @@ const markAllAsRead = async (req, res) => {
   }
 };
 
+// Create notification and optionally sync to calendar
+const createNotification = async (req, res) => {
+  try {
+    const { userId, message, status, recipientType, syncToCalendar, calendarDetails } = req.body;
+
+    const notification = await Notification.create({
+      userId,
+      message,
+      status,
+      recipientType,
+      type: 'appointment'
+    });
+
+    if (syncToCalendar && calendarDetails?.start && calendarDetails?.end) {
+      const user = await User.findById(userId);
+      if (user?.googleAccessToken && user?.googleRefreshToken) {
+        const calendarEvent = await createEvent({
+          user,
+          summary: calendarDetails.summary || 'Appointment Notification',
+          description: message,
+          start: calendarDetails.start,
+          end: calendarDetails.end
+        });
+
+        if (calendarEvent) {
+          console.log('📅 Notification synced to calendar:', calendarEvent.id);
+        }
+      }
+    }
+
+    res.status(201).json({ message: 'Notification created', notification });
+  } catch (err) {
+    console.error('Create notification error:', err.message);
+    res.status(500).json({ error: 'Failed to create notification' });
+  }
+};
+
 module.exports = {
   getNotifications,
   getUnreadCount,
   markAsRead,
-  markAllAsRead
+  markAllAsRead,
+  createNotification
 };

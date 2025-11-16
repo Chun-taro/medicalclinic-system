@@ -47,12 +47,6 @@ const bookAppointment = async (req, res) => {
     // Sync to Google Calendar
     if (req.user.googleAccessToken && req.user.googleRefreshToken) {
       try {
-        console.log('Attempting to sync event to Google Calendar...');
-        console.log(' Tokens:', {
-          access: req.user.googleAccessToken,
-          refresh: req.user.googleRefreshToken
-        });
-
         const calendarEvent = await createEvent({
           user: req.user,
           summary: 'Medical Appointment',
@@ -62,17 +56,12 @@ const bookAppointment = async (req, res) => {
         });
 
         if (calendarEvent) {
-          console.log(' Calendar event synced:', calendarEvent.id);
-          appointment.calendarEventId = calendarEvent.id; 
-          await appointment.save(); t
-        } else {
-          console.warn(' Calendar event creation returned null');
+          appointment.calendarEventId = calendarEvent.id;
+          await appointment.save();
         }
       } catch (calendarErr) {
-        console.error(' Calendar sync error:', calendarErr.response?.data || calendarErr.message);
+        console.error('Calendar sync error:', calendarErr.response?.data || calendarErr.message);
       }
-    } else {
-      console.warn('No Google tokens found on user object');
     }
 
     res.status(201).json({ message: 'Appointment booked successfully' });
@@ -81,6 +70,7 @@ const bookAppointment = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 

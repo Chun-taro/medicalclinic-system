@@ -7,10 +7,11 @@ const createEvent = async ({ user, summary, description, start, end }) => {
     }
 
     const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CALENDAR_CLIENT_ID,
-      process.env.GOOGLE_CALENDAR_CLIENT_SECRET,
-      process.env.GOOGLE_CALENDAR_REDIRECT_URI
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
     );
+
     oauth2Client.setCredentials({
       access_token: user.googleAccessToken,
       refresh_token: user.googleRefreshToken
@@ -21,14 +22,8 @@ const createEvent = async ({ user, summary, description, start, end }) => {
     const event = {
       summary,
       description,
-      start: {
-        dateTime: new Date(start).toISOString(),
-        timeZone: 'Asia/Manila'
-      },
-      end: {
-        dateTime: new Date(end).toISOString(),
-        timeZone: 'Asia/Manila'
-      }
+      start: { dateTime: new Date(start).toISOString(), timeZone: 'Asia/Manila' },
+      end:   { dateTime: new Date(end).toISOString(), timeZone: 'Asia/Manila' }
     };
 
     const response = await calendar.events.insert({
@@ -36,7 +31,6 @@ const createEvent = async ({ user, summary, description, start, end }) => {
       resource: event
     });
 
-    console.log('Google Calendar event created:', response.data);
     return response.data;
   } catch (err) {
     console.error('Google Calendar sync failed:', err.message);

@@ -202,3 +202,73 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
+/* Small devices (phones, < 480px) */
+@media (max-width: 480px) {
+  .auth-wrapper {
+    padding: 1rem 0.5rem;
+  }
+
+  .auth-right {
+    max-width: 100%;
+    min-width: 100%;
+    padding: 1rem;
+    border-radius: 0;
+    max-height: none;
+    box-shadow: none;
+    border: none;
+    backdrop-filter: none;
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+
+  .form-header .clinic-logo {
+    width: 60px;
+  }
+
+  .clinic-title {
+    font-size: 1.2rem;
+  }
+
+  .auth-right h2 {
+    font-size: 1.2rem;
+  }
+
+  .auth-right input,
+  .auth-right select,
+  .auth-right button {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+
+  .google-button {
+    width: 100%;
+    height: 40px;
+  }
+
+  .google-icon {
+    width: 100%;
+    height: 40px;
+  }
+}
+
+/* Medium devices (tablets, 481px–768px) */
+@media (max-width: 768px) {
+  .auth-wrapper {
+    padding: 1.5rem;
+  }
+
+  .auth-right {
+    max-width: 90%;
+    padding: 1.25rem;
+  }
+
+  .auth-right h2 {
+    font-size: 1.3rem;
+  }
+
+  .auth-right input,
+  .auth-right select,
+  .auth-right button {
+    font-size: 0.9rem;
+  }
+}

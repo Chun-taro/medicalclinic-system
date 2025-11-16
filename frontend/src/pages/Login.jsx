@@ -69,65 +69,59 @@ export default function Login() {
       <div className="image-overlay"></div>
 
       <div className="auth-right">
-        <div className="form-wrapper">
-          <div className="form-header center-align">
-            <img src={logo} alt="BukSU Medical Logo" className="clinic-logo" />
-            <h2 className="clinic-title">BukSU<br />Medical Clinic</h2>
-            <hr className="form-divider" />
-          </div>
-<p className="google-label">Continue with Google</p>
-          <a href="http://localhost:5000/api/auth/google" style={{ textDecoration: "none" }}>
-  <button
-    style={{
-      border: "none",
-      backgroundColor: "transparent",
-      padding: "0",
-      cursor: "pointer"
-    }}
-  >
-    <img
-      src={GoogleLogo}
-      alt="Google logo"
-      style={{
-        width: "90px",
-        height: "40px"
-      }}
+  <form className="form-wrapper" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+    <div className="form-header center-align">
+      <img src={logo} alt="BukSU Medical Logo" className="clinic-logo" />
+      <h2 className="clinic-title">BukSU<br />Medical Clinic</h2>
+      <hr className="form-divider" />
+    </div>
+
+    <input
+      type="text"
+      placeholder="Email or phone number"
+      autoComplete="username"
+      value={form.email}
+      onChange={e => setForm({ ...form, email: e.target.value })}
     />
-  </button>
-</a>
-          <input
-            type="text"
-            placeholder="Email or phone number"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-          />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
-          />
+    <input
+      type="password"
+      placeholder="Password"
+      autoComplete="current-password"
+      value={form.password}
+      onChange={e => setForm({ ...form, password: e.target.value })}
+    />
 
-          <div className="recaptcha-container">
-            <Recaptcha
-              onVerify={handleRecaptchaVerify}
-              onExpire={handleRecaptchaExpire}
-            />
-            {recaptchaError && <p className="recaptcha-error">{recaptchaError}</p>}
-          </div>
+    <div className="recaptcha-container">
+      <Recaptcha
+        onVerify={handleRecaptchaVerify}
+        onExpire={handleRecaptchaExpire}
+      />
+      {recaptchaError && <p className="recaptcha-error">{recaptchaError}</p>}
+    </div>
 
-          <button onClick={handleLogin}>Continue →</button>
+    <button type="submit">Continue →</button>
+<p className="google-label">Or continue with Google</p>
+    <a href="http://localhost:5000/api/auth/google" className="google-button">
+      <img src={GoogleLogo} alt="Google logo" className="google-icon" />
+    </a>
+    <p>
+      Don't have an account?{' '}
+      <span role="button" tabIndex={0} onClick={() => navigate('/signup')}>
+        Register here
+      </span>
+    </p>
 
-          <p>
-            Don't have an account? <span onClick={() => navigate('/signup')}>Register here</span>
-          </p>
+    <p className="forgot-password">
+      <span role="button" tabIndex={0} onClick={() => navigate('/forgot-password')}>
+        Forgot Password?
+      </span>
+    </p>
 
-          <p className="forgot-password">
-            <span onClick={() => navigate('/forgot-password')}>Forgot Password?</span>
-          </p>
-        </div>
-      </div>
+    {/* Moved Google login below */}
+    
+  </form>
+</div>
     </div>
   );
 }

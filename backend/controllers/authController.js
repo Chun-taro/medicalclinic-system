@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
+const { google } = require('googleapis');
 
 // Local signup
 const signup = async (req, res) => {
@@ -131,9 +132,44 @@ const googleSignup = async (req, res) => {
   }
 };
 
+// Google Calendar OAuth Callback
+const googleCalendarCallback = async (req, res) => {
+  try {
+    const { code, state } = req.query;
+    const userId = state; // state should contain the user ID from redirect
+
+    if (!code || !userId) {
+      return res.status(400).json({ error: 'Missing code or userId' });
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CALENDAR_CLIENT_ID,
+      process.env.GOOGLE_CALENDAR_CLIENT_SECRET,
+      process.env.GOOGLE_CALENDAR_REDIRECT_URI
+    );
+
+    // Exchange authorization code for tokens
+    const { tokens } = await oauth2Client.getToken(code);
+
+    // Update user with access and refresh tokens
+    await User.findByIdAndUpdate(userId, {
+      googleAccessToken: tokens.access_token,
+      googleRefreshToken: tokens.refresh_token || tokens.access_token // Fallback if no refresh token
+    });
+
+    // Redirect to frontend success page
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/google-calendar-success?userId=${userId}`);
+  } catch (err) {
+    console.error('Google Calendar OAuth error:', err.message);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/google-calendar-failure?error=${encodeURIComponent(err.message)}`);
+  }
+};
+
 module.exports = {
   signup,
   login,
   validateToken,
-  googleSignup
-};
+  googleSignup,
+  googleCalendarCallback

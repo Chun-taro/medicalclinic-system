@@ -126,6 +126,10 @@ lastAdmissionTypeLocation: { type: String, trim: true },
     minlength: 6
   },
   googleId: { type: String },
+  
+  // Google Calendar OAuth
+  googleAccessToken: { type: String },
+  googleRefreshToken: { type: String },
 
   //  Role
   role: {

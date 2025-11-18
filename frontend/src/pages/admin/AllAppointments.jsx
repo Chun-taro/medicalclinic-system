@@ -12,6 +12,10 @@ export default function AllAppointments() {
   const [editId, setEditId] = useState(null);
   const [editDate, setEditDate] = useState('');
   const [editPurpose, setEditPurpose] = useState('');
+  // Filters
+  const [nameFilter, setNameFilter] = useState('');
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
 
   const fetchAppointments = async () => {
     try {
@@ -31,6 +35,32 @@ export default function AllAppointments() {
   useEffect(() => {
     fetchAppointments();
   }, []);
+
+  // Apply client-side filters to appointments list
+  const filteredAppointments = appointments.filter(app => {
+    // Name filter: match patient name from patientId or appointment-level name
+    if (nameFilter) {
+      const q = nameFilter.toLowerCase();
+      const first = app.patientId?.firstName || app.firstName || '';
+      const last = app.patientId?.lastName || app.lastName || '';
+      const full = (first + ' ' + last).toLowerCase();
+      if (!full.includes(q)) return false;
+    }
+
+    // Date filters (inclusive)
+    if (startDateFilter) {
+      const start = new Date(startDateFilter);
+      const appDate = new Date(app.appointmentDate);
+      if (appDate < new Date(start.getFullYear(), start.getMonth(), start.getDate())) return false;
+    }
+    if (endDateFilter) {
+      const end = new Date(endDateFilter);
+      const appDate = new Date(app.appointmentDate);
+      if (appDate > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59)) return false;
+    }
+
+    return true;
+  });
 
   const handleDelete = async id => {
     if (!window.confirm('Are you sure you want to delete this appointment?')) return;
@@ -88,6 +118,29 @@ export default function AllAppointments() {
   return (
     <AdminLayout>
       <h2>All Appointments</h2>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="Search by name"
+          value={nameFilter}
+          onChange={e => setNameFilter(e.target.value)}
+        />
+        <label style={{ fontSize: '12px' }}>From:</label>
+        <input
+          type="date"
+          value={startDateFilter}
+          onChange={e => setStartDateFilter(e.target.value)}
+        />
+        <label style={{ fontSize: '12px' }}>To:</label>
+        <input
+          type="date"
+          value={endDateFilter}
+          onChange={e => setEndDateFilter(e.target.value)}
+        />
+        <button onClick={() => { setNameFilter(''); setStartDateFilter(''); setEndDateFilter(''); }}>Clear</button>
+      </div>
 
      {/* Tab Navigation */}
 <div className="tab-header">
@@ -157,7 +210,7 @@ export default function AllAppointments() {
                     </tr>
                   </thead>
                   <tbody>
-  {appointments.filter(app => app.status === 'pending').map(app => (
+  {filteredAppointments.filter(app => app.status === 'pending').map(app => (
     <tr key={app._id}>
       <td>{app.patientId?.firstName} {app.patientId?.lastName}</td>
       <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
@@ -195,7 +248,7 @@ export default function AllAppointments() {
                     </tr>
                   </thead>
                   <tbody>
-  {appointments.filter(app => app.status === 'approved').map(app => (
+  {filteredAppointments.filter(app => app.status === 'approved').map(app => (
     <tr key={app._id}>
       <td>{app.patientId?.firstName} {app.patientId?.lastName}</td>
       <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>

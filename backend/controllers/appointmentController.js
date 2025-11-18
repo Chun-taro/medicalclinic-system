@@ -23,6 +23,7 @@ const bookAppointment = async (req, res) => {
   patientId: req.user.userId,
   appointmentDate,
   purpose,
+  reasonForVisit: req.body.reasonForVisit || purpose,
   typeOfVisit: req.body.typeOfVisit || 'scheduled'
 });
 
@@ -68,7 +69,8 @@ const getMyAppointments = async (req, res) => {
       .populate('patientId', 'firstName lastName email contactNumber')
       .sort({ appointmentDate: -1 })
       .skip(page * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     res.json(appointments);
   } catch (err) {
@@ -88,8 +90,9 @@ const getPatientAppointments = async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
+    // Include management and medicinesPrescribed so the patient view shows consultation details
     const appointments = await Appointment.find({ patientId: requestedPatientId })
-      .select('appointmentDate status purpose typeOfVisit diagnosis consultationCompletedAt')
+      .select('appointmentDate status purpose reasonForVisit typeOfVisit diagnosis management medicinesPrescribed consultationCompletedAt')
       .sort({ appointmentDate: -1 })
       .lean();
 
@@ -370,6 +373,8 @@ const completeConsultation = async (req, res) => {
     }
 
     res.json(appointment);
+    // Debug: log updated appointment to verify stored fields
+    console.log('Appointment marked completed:', appointment);
   } catch (err) {
     console.error(' Completion error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
@@ -379,18 +384,47 @@ const completeConsultation = async (req, res) => {
 const saveConsultation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { diagnosis, management, medicinesPrescribed } = req.body;
+    const {
+      diagnosis,
+      management,
+      medicinesPrescribed,
+      bloodPressure,
+      temperature,
+      oxygenSaturation,
+      heartRate,
+      bmi,
+      bmiIntervention,
+      referredToPhysician,
+      physicianName,
+      firstAidDone,
+      firstAidWithin30Mins,
+      consultationCompletedAt
+    } = req.body;
 
     const appointment = await Appointment.findById(id);
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
 
+    // Update all consultation fields
     appointment.diagnosis = diagnosis;
     appointment.management = management;
     appointment.medicinesPrescribed = medicinesPrescribed;
+    appointment.bloodPressure = bloodPressure;
+    appointment.temperature = temperature;
+    appointment.oxygenSaturation = oxygenSaturation;
+    appointment.heartRate = heartRate;
+    appointment.bmi = bmi;
+    appointment.bmiIntervention = bmiIntervention;
+    appointment.referredToPhysician = referredToPhysician;
+    appointment.physicianName = physicianName;
+    appointment.firstAidDone = firstAidDone;
+    appointment.firstAidWithin30Mins = firstAidWithin30Mins;
     appointment.status = 'completed';
-    appointment.consultationCompletedAt = new Date();
+    appointment.consultationCompletedAt = consultationCompletedAt || new Date();
 
     await appointment.save();
+
+    // Debug: log saved consultation to verify fields
+    console.log('Consultation saved with vitals:', appointment);
 
     res.json({ message: 'Consultation saved', appointment });
   } catch (err) {
@@ -456,9 +490,11 @@ const generateReports = async (req, res) => {
 //  Get consultations (all with diagnosis)
 const getConsultations = async (req, res) => {
   try {
+    // Populate patient basic info (firstName, lastName) from User when available.
     const consultations = await Appointment.find({ diagnosis: { $ne: null } })
+      .populate('patientId', 'firstName lastName email contactNumber')
       .select(
-        'firstName lastName appointmentDate consultationCompletedAt chiefComplaint diagnosis management bloodPressure temperature heartRate oxygenSaturation bmi medicinesPrescribed referredToPhysician physicianName firstAidDone firstAidWithin30Mins'
+        'patientId firstName lastName appointmentDate consultationCompletedAt chiefComplaint diagnosis management bloodPressure temperature heartRate oxygenSaturation bmi bmiIntervention medicinesPrescribed referredToPhysician physicianName firstAidDone firstAidWithin30Mins'
       )
       .sort({ consultationCompletedAt: -1 })
       .lean();

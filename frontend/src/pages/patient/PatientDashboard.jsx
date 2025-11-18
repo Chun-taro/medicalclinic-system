@@ -73,7 +73,7 @@ export default function PatientDashboard() {
                   <td>{apt.status}</td>
                   <td>{new Date(apt.appointmentDate).toLocaleDateString()}</td>
                   <td>{apt.typeOfVisit || '—'}</td>
-                  <td>{apt.reasonForVisit || '—'}</td>
+                  <td>{apt.reasonForVisit || apt.purpose || '—'}</td>
                   <td>{apt.management || '—'}</td>
                   <td>
                     {Array.isArray(apt.medicinesPrescribed)

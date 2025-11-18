@@ -10,6 +10,10 @@ export default function ConsultationPage() {
   const [prescribedList, setPrescribedList] = useState([]);
   const [medicineSearch, setMedicineSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  // Filters
+  const [nameFilter, setNameFilter] = useState('');
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
 
   const [showMRFModal, setShowMRFModal] = useState(false);
   const [patientProfile, setPatientProfile] = useState(null);
@@ -79,12 +83,17 @@ export default function ConsultationPage() {
     fetchMedicines();
   }, []);
 
+  // Only disable body scrolling while a modal is open
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    if (showModal || showMRFModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
     return () => {
       document.body.style.overflow = '';
     };
-  }, []);
+  }, [showModal, showMRFModal]);
 
   const handleStartConsultation = appointment => {
     setSelectedAppointment(appointment);
@@ -165,40 +174,89 @@ export default function ConsultationPage() {
     <AdminLayout>
       <div className="consultation-container">
         <h2>Consultation Queue</h2>
+        {/* Filters */}
+        <div className="filters-row" style={{ display: 'flex', gap: 12, marginBottom: 12, alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Search by patient name..."
+            value={nameFilter}
+            onChange={e => setNameFilter(e.target.value)}
+            style={{ padding: '8px', minWidth: 220 }}
+          />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 13 }}>From</span>
+            <input type="date" value={startDateFilter} onChange={e => setStartDateFilter(e.target.value)} />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 13 }}>To</span>
+            <input type="date" value={endDateFilter} onChange={e => setEndDateFilter(e.target.value)} />
+          </label>
+          <button onClick={() => { setNameFilter(''); setStartDateFilter(''); setEndDateFilter(''); }} style={{ marginLeft: 6 }}>Clear</button>
+        </div>
+
         {approvedAppointments.length === 0 ? (
           <p>No approved appointments waiting for consultation.</p>
         ) : (
-          <table className="appointments-table">
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Email</th>
-                <th>Date</th>
-                <th>Purpose</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-           <tbody>
-  {approvedAppointments.map(app => (
-    <tr key={app._id}>
-      <td>
-  <span
-    className="clickable-name"
-    onClick={() => handleViewMRF(app.patientId?._id)}
-  >
-    {app.patientId?.firstName} {app.patientId?.lastName}
-  </span>
-</td>
-<td>{app.patientId?.email}</td>
-      <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
-      <td>{app.purpose}</td>
-      <td>
-        <button onClick={() => handleStartConsultation(app)}>🩺 Start</button>
-      </td>
-    </tr>
-  ))}
-</tbody>
+          // apply filters client-side
+          (() => {
+            const filtered = approvedAppointments.filter(app => {
+              // name filter
+              if (nameFilter) {
+                const q = nameFilter.toLowerCase();
+                const fullName = `${app.patientId?.firstName || ''} ${app.patientId?.lastName || ''}`.toLowerCase();
+                if (!fullName.includes(q)) return false;
+              }
+
+              // date filter
+              if (startDateFilter) {
+                const start = new Date(startDateFilter);
+                const appDate = new Date(app.appointmentDate);
+                // compare dates ignoring time
+                if (appDate < new Date(start.getFullYear(), start.getMonth(), start.getDate())) return false;
+              }
+              if (endDateFilter) {
+                const end = new Date(endDateFilter);
+                const appDate = new Date(app.appointmentDate);
+                if (appDate > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59)) return false;
+              }
+
+              return true;
+            });
+
+            return (
+              <table className="appointments-table">
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Email</th>
+                    <th>Date</th>
+                    <th>Purpose</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(app => (
+                    <tr key={app._id}>
+                      <td>
+                        <span
+                          className="clickable-name"
+                          onClick={() => handleViewMRF(app.patientId?._id)}
+                        >
+                          {app.patientId?.firstName} {app.patientId?.lastName}
+                        </span>
+                      </td>
+                      <td>{app.patientId?.email}</td>
+                      <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
+                      <td>{app.purpose}</td>
+                      <td>
+                        <button onClick={() => handleStartConsultation(app)}>🩺 Start</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
           </table>
+            );
+          })()
         )}
 
         {/* MRF Modal */}

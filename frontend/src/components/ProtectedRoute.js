@@ -11,8 +11,13 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   // Check if role exists and matches required role
-  if (requiredRole && (!role || role !== requiredRole)) {
+  // Allow superadmin, doctor, nurse to access admin routes
+  if (requiredRole && (!role || (role !== requiredRole && !(role === 'superadmin' && requiredRole === 'admin') && !(role === 'doctor' && requiredRole === 'admin') && !(role === 'nurse' && requiredRole === 'admin')))) {
     console.log(`Role mismatch: expected ${requiredRole}, got ${role}`);
+    // Redirect doctors and nurses to admin dashboard if they try to access patient routes
+    if ((role === 'doctor' || role === 'nurse') && requiredRole === 'patient') {
+      return <Navigate to="/admin-dashboard" replace />;
+    }
     return <Navigate to="/unauthorized" replace />;
   }
 

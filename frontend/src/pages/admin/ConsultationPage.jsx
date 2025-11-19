@@ -18,6 +18,9 @@ export default function ConsultationPage() {
   const [showMRFModal, setShowMRFModal] = useState(false);
   const [patientProfile, setPatientProfile] = useState(null);
 
+  const [showPDFModal, setShowPDFModal] = useState(false);
+  const [selectedPDFAppointment, setSelectedPDFAppointment] = useState(null);
+
   const [form, setForm] = useState({
     bloodPressure: '',
     temperature: '',
@@ -75,6 +78,30 @@ export default function ConsultationPage() {
     } catch (err) {
       console.error('Error fetching patient profile:', err.message);
       alert('Failed to load patient profile');
+    }
+  };
+
+  const handleGenerateCertificate = async (appointment) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:5000/api/appointments/${appointment._id}/certificate-pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `medical_certificate_${appointment._id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Navigate to Reports page with medical-certificates tab
+      window.location.href = '/admin-reports?tab=medical-certificates';
+    } catch (err) {
+      console.error('Error downloading certificate:', err);
+      alert('Failed to download certificate');
     }
   };
 
@@ -249,7 +276,11 @@ export default function ConsultationPage() {
                       <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
                       <td>{app.purpose}</td>
                       <td>
-                        <button onClick={() => handleStartConsultation(app)}>🩺 Start</button>
+                        {app.purpose === 'Medical Certificate' ? (
+                          <button onClick={() => { setSelectedPDFAppointment(app); setShowPDFModal(true); }}>📄 Certificate</button>
+                        ) : (
+                          <button onClick={() => handleStartConsultation(app)}>🩺 Start</button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -321,6 +352,39 @@ export default function ConsultationPage() {
   </div>
 </div>
         )}
+
+        {/* PDF Modal */}
+        {showPDFModal && selectedPDFAppointment && (
+          <div className="modal-overlay">
+            <div className="consultation-modal">
+              <button className="close-button" onClick={() => setShowPDFModal(false)}>✖</button>
+              <h3 className="modal-title">📄 Print Medical Certificate</h3>
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>Patient: {selectedPDFAppointment.patientId?.firstName} {selectedPDFAppointment.patientId?.lastName}</p>
+                <p>Purpose: {selectedPDFAppointment.purpose}</p>
+                <p>Date: {new Date(selectedPDFAppointment.appointmentDate).toLocaleDateString()}</p>
+                <button
+                  onClick={() => {
+                    handleGenerateCertificate(selectedPDFAppointment);
+                    setShowPDFModal(false);
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    marginTop: '20px'
+                  }}
+                >
+                  🖨️ Print Certificate
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showModal && selectedAppointment && (
   <div className="modal-overlay">
     <div className="consultation-modal">

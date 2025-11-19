@@ -134,7 +134,7 @@ lastAdmissionTypeLocation: { type: String, trim: true },
   //  Role
   role: {
     type: String,
-    enum: ['patient', 'admin', 'doctor', 'nurse'],
+    enum: ['patient', 'admin', 'doctor', 'nurse', 'superadmin'],
     default: 'patient'
   },
 

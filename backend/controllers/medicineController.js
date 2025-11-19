@@ -2,9 +2,12 @@ const mongoose = require('mongoose');
 const Medicine = require('../models/Medicine');
 const jwt = require('jsonwebtoken');
 
-// Get all medicines
+// Get all medicines (admin or superadmin only)
 const getAllMedicines = async (req, res) => {
   try {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'doctor' && req.user.role !== 'nurse') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
     const medicines = await Medicine.find().sort({ name: 1, expiryDate: 1 });
     res.json(medicines);
   } catch (err) {

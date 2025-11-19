@@ -146,7 +146,10 @@ export default function AdminLayout({ children }) {
       <main className="main-content">
         <nav className="navbar">
           <div className="navbar-left">
-            <h1 className="fb-name">{admin.firstName} {admin.lastName}</h1>
+            <div className="user-info">
+              <h1 className="fb-name">{admin.firstName} {admin.lastName}</h1>
+              <span className="user-role">{localStorage.getItem('role')?.toUpperCase()}</span>
+            </div>
           </div>
 
           <div className="navbar-right">

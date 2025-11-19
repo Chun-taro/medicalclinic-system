@@ -15,7 +15,8 @@ const {
   getConsultationById,
   updateAppointment,
   saveConsultation,
-  prescribeMedicines
+  prescribeMedicines,
+  generateCertificatePDF
 } = require('../controllers/appointmentController');
 
 const { auth } = require('../middleware/auth');
@@ -41,5 +42,8 @@ router.post('/:id/prescribe', auth, prescribeMedicines);
 router.get('/reports', auth, generateReports);
 router.get('/consultations', auth, getConsultations);
 router.get('/consultations/:id', auth, getConsultationById);
+
+//  Certificate generation
+router.get('/:id/certificate-pdf', auth, generateCertificatePDF);
 
 module.exports = router;

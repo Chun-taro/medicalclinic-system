@@ -21,7 +21,7 @@ export default function PatientDashboard() {
         return;
       }
 
-      if (role !== 'patient') {
+      if (role !== 'patient' && role !== 'doctor' && role !== 'nurse') {
         console.log('Role check failed:', { role, expected: 'patient' });
         navigate('/unauthorized');
         return;

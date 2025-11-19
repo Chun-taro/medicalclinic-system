@@ -3,6 +3,8 @@ const router = express.Router();
 
 const {
   signup,
+  superadminSignup,
+  superadminLogin,
   login,
   googleSignup,
   validateToken
@@ -14,6 +16,7 @@ const jwt = require('jsonwebtoken');
 
 //  Local Authentication
 router.post('/signup', signup);
+router.post('/superadmin-login', superadminLogin);
 router.post('/login', login);
 router.post('/google-signup', googleSignup);
 

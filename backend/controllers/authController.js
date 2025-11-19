@@ -43,6 +43,38 @@ const signup = async (req, res) => {
   }
 };
 
+// Superadmin login (for existing superadmin users)
+const superadminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+
+    if (user.role !== 'superadmin') {
+      return res.status(403).json({ error: 'Access denied. Superadmin only.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({ message: 'Superadmin login successful', token, userId: user._id, role: user.role });
+  } catch (err) {
+    console.error('Superadmin login error:', err.message);
+    res.status(500).json({ error: 'Login failed' });
+  }
+};
+
 // Local login
 const login = async (req, res) => {
   try {
@@ -176,6 +208,7 @@ const googleCalendarCallback = async (req, res) => {
 
 module.exports = {
   signup,
+  superadminLogin,
   login,
   validateToken,
   googleSignup,

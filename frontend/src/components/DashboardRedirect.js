@@ -1,20 +1,15 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
-export default function DashboardRedirect() {
-  const navigate = useNavigate();
+const DashboardRedirect = () => {
+  const role = localStorage.getItem('role');
 
-  useEffect(() => {
-    const role = localStorage.getItem('role');
+  if (role === 'superadmin') {
+    return <Navigate to="/superadmin-dashboard" replace />;
+  } else if (role === 'admin' || role === 'doctor' || role === 'nurse') {
+    return <Navigate to="/admin-dashboard" replace />;
+  } else {
+    return <Navigate to="/patient-dashboard" replace />;
+  }
+};
 
-    if (role === 'admin') {
-      navigate('/admin-dashboard');
-    } else if (role === 'patient') {
-      navigate('/patient-dashboard');
-    } else {
-      navigate('/');
-    }
-  }, [navigate]); 
-
-  return <p>Redirecting to your dashboard...</p>;
-}
+export default DashboardRedirect;

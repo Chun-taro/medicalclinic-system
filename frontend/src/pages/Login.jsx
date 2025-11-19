@@ -69,7 +69,7 @@ export default function Login() {
       <div className="image-overlay"></div>
 
       <div className="auth-right">
-  <form className="form-wrapper" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+  <form className="form-wrapper" onSubmit={(e) => { e.preventDefault(); handleLogin(); }} style={{position: 'relative'}}>
     <div className="form-header center-align">
       <img src={logo} alt="BukSU Medical Logo" className="clinic-logo" />
       <h2 className="clinic-title">BukSU<br />Medical Clinic</h2>
@@ -117,7 +117,26 @@ export default function Login() {
         Forgot Password?
       </span>
     </p>
-    
+
+    {/* Secret superadmin login button */}
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '10px',
+        right: '10px',
+        width: '20px',
+        height: '20px',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: '50%',
+        cursor: 'pointer',
+        border: '1px solid rgba(0,0,0,0.3)'
+      }}
+      onClick={() => navigate('/superadmin-login')}
+      title="Superadmin Login"
+      onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(0,0,0,0.5)'}
+      onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(0,0,0,0.2)'}
+    ></div>
+
   </form>
 </div>
     </div>

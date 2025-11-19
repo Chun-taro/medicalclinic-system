@@ -1,8 +1,10 @@
 const Appointment = require('../models/Appointment');
 const User = require('../models/User');
+const Medicine = require('../models/Medicine');
 const { google } = require('googleapis');
 const { sendNotification } = require('../utils/sendNotification');
 const sendEmail = require('../utils/mailer');
+const puppeteer = require('puppeteer');
 
 
 
@@ -103,10 +105,10 @@ const getPatientAppointments = async (req, res) => {
   }
 };
 
-//  Get all appointments (admin only) 
+//  Get all appointments (admin or superadmin only)
 const getAllAppointments = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'doctor' && req.user.role !== 'nurse') {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -114,8 +116,8 @@ const getAllAppointments = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 20;
 
     const appointments = await Appointment.find()
-      .populate('patientId', 'firstName lastName email contactNumber') 
-      .select('appointmentDate status purpose typeOfVisit patientId') 
+      .populate('patientId', 'firstName lastName email contactNumber')
+      .select('appointmentDate status purpose typeOfVisit patientId')
       .sort({ appointmentDate: -1 })
       .skip(page * limit)
       .limit(limit)
@@ -167,7 +169,7 @@ const updateAppointmentStatus = async (req, res) => {
 // Approve appointment
 const approveAppointment = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -437,7 +439,7 @@ const saveConsultation = async (req, res) => {
 //  Delete appointment
 const deleteAppointment = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -651,6 +653,110 @@ const prescribeMedicines = async (req, res) => {
   }
 };
 
+const generateCertificatePDF = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id).populate('patientId', 'firstName lastName');
+    if (!appointment) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    const patient = appointment.patientId;
+    if (!patient) {
+      return res.status(404).json({ error: 'Patient not found' });
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Medical Certificate</title>
+        <style>
+          body {
+            font-family: 'Times New Roman', serif;
+            margin: 40px;
+            line-height: 1.6;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 40px;
+          }
+          .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+          }
+          .header p {
+            font-size: 14px;
+            margin: 5px 0;
+          }
+          .certificate-content {
+            margin: 40px 0;
+          }
+          .certificate-content p {
+            margin: 20px 0;
+            font-size: 16px;
+          }
+          .signature-section {
+            margin-top: 60px;
+            text-align: left;
+          }
+          .signature-line {
+            border-bottom: 1px solid #000;
+            width: 300px;
+            margin-top: 40px;
+          }
+          .date-section {
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Medical Certificate</h1>
+          <p>Medical Center Name</p>
+          <p>Address Line 1</p>
+          <p>City, State, ZIP Code</p>
+          <p>Phone: (123) 456-7890</p>
+        </div>
+
+        <div class="certificate-content">
+          <p>This is to certify that</p>
+          <p><strong>${patient.firstName} ${patient.lastName}</strong></p>
+          <p>has been examined and is found to be in good health and fit for work/school.</p>
+          <p>The examination was conducted on <strong>${new Date().toLocaleDateString()}</strong>.</p>
+        </div>
+
+        <div class="signature-section">
+          <p>Doctor's Signature:</p>
+          <div class="signature-line"></div>
+          <p>Dr. [Doctor's Name]</p>
+          <p>License Number: [License #]</p>
+        </div>
+
+        <div class="date-section">
+          <p>Date: ${new Date().toLocaleDateString()}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    await browser.close();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="medical_certificate_${appointment._id}.pdf"`);
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('PDF generation error:', err.message);
+    res.status(500).json({ error: 'Failed to generate PDF' });
+  }
+};
+
 module.exports = {
   bookAppointment,
   getPatientAppointments,
@@ -665,5 +771,6 @@ module.exports = {
   getConsultationById,
   updateAppointment,
   saveConsultation,
-  prescribeMedicines
+  prescribeMedicines,
+  generateCertificatePDF
 };

@@ -10,12 +10,14 @@ const {
   getAllDispenseHistory
 } = require('../controllers/medicineController');
 
-router.get('/', getAllMedicines);
-router.post('/', createMedicine);
-router.post('/deduct', deductMedicines);
-router.delete('/:id', deleteMedicine);
-router.post('/:id/dispense', dispenseCapsules);
-router.get('/:id/history', getDispenseHistory);
-router.get('/history', getAllDispenseHistory); 
+const { auth } = require('../middleware/auth');
+
+router.get('/', auth, getAllMedicines);
+router.post('/', auth, createMedicine);
+router.post('/deduct', auth, deductMedicines);
+router.delete('/:id', auth, deleteMedicine);
+router.post('/:id/dispense', auth, dispenseCapsules);
+router.get('/:id/history', auth, getDispenseHistory);
+router.get('/history', auth, getAllDispenseHistory);
 
 module.exports = router;

@@ -1,9 +1,9 @@
 const User = require('../models/User');
 
-// Get all users (admin only)
+// Get all users (admin or superadmin only)
 const getAllUsers = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin' && req.user.role !== 'doctor' && req.user.role !== 'nurse') {
       return res.status(403).json({ error: 'Access denied. Admins only.' });
     }
     const users = await User.find().select('-password');
@@ -13,15 +13,15 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-//  Update user role (admin only)
+//  Update user role (superadmin only)
 const updateUserRole = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    if (req.user.role !== 'superadmin') {
+      return res.status(403).json({ error: 'Access denied. Superadmins only.' });
     }
 
     const { role } = req.body;
-    const validRoles = ['patient', 'admin', 'doctor', 'nurse'];
+    const validRoles = ['patient', 'admin', 'doctor', 'nurse', 'superadmin'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ error: 'Invalid role specified.' });
     }
@@ -51,10 +51,10 @@ const getRoleByGoogleId = async (req, res) => {
   }
 };
 
-//  Get profile by user ID (admin only)
+//  Get profile by user ID (admin or superadmin only)
 const getProfileById = async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
       return res.status(403).json({ error: 'Access denied. Admins only.' });
     }
     const user = await User.findById(req.params.id).select('-password');

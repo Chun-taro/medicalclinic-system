@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import AdminLayout from "./AdminLayout";
 import "./Style/Reports.css";
@@ -13,6 +14,9 @@ function useRealTime() {
 }
 
 export default function Reports() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "consultations";
+
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,9 +49,8 @@ export default function Reports() {
         });
 
         setConsultations(sortedConsultations);
-        if (sortedConsultations.length > 0) {
-          setExpandedId(sortedConsultations[0]._id);
-        }
+        // Reset expandedId when tab changes
+        setExpandedId(null);
       } catch (err) {
         console.error("Error fetching consultations:", err);
         setError("Failed to load consultations");
@@ -57,7 +60,7 @@ export default function Reports() {
     };
 
     fetchConsultations();
-  }, []);
+  }, [activeTab]);
 
   const formatDateTime = (date) => {
     try {
@@ -85,6 +88,11 @@ export default function Reports() {
   };
 
   const filteredConsultations = consultations.filter(c => {
+    // Filter by tab
+    if (activeTab === 'medical-certificates') {
+      if (c.purpose !== 'Medical Certificate') return false;
+    }
+
     if (nameFilter) {
       const q = nameFilter.toLowerCase();
       const firstName = c.firstName || c.patientId?.firstName || '';
@@ -119,8 +127,42 @@ export default function Reports() {
           <p className="status-msg error">{error}</p>
         ) : (
           <>
+            {/* Tabs */}
+            <div className="tabs" style={{ display: 'flex', marginBottom: '20px' }}>
+              <button
+                className={`tab-button ${activeTab === 'consultations' ? 'active' : ''}`}
+                onClick={() => setSearchParams({ tab: 'consultations' })}
+                style={{
+                  padding: '10px 20px',
+                  border: 'none',
+                  backgroundColor: activeTab === 'consultations' ? '#007bff' : '#f8f9fa',
+                  color: activeTab === 'consultations' ? 'white' : 'black',
+                  cursor: 'pointer',
+                  borderRadius: '5px 0 0 5px'
+                }}
+              >
+                🩺 Consultations
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'medical-certificates' ? 'active' : ''}`}
+                onClick={() => setSearchParams({ tab: 'medical-certificates' })}
+                style={{
+                  padding: '10px 20px',
+                  border: 'none',
+                  backgroundColor: activeTab === 'medical-certificates' ? '#007bff' : '#f8f9fa',
+                  color: activeTab === 'medical-certificates' ? 'white' : 'black',
+                  cursor: 'pointer',
+                  borderRadius: '0 5px 5px 0'
+                }}
+              >
+                📄 Medical Certificates
+              </button>
+            </div>
+
             {/* Consultations */}
-            <h3 className="section-title">🩺 Past Consultations</h3>
+            <h3 className="section-title">
+              {activeTab === 'consultations' ? '🩺 Past Consultations' : '📄 Medical Certificates'}
+            </h3>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
               <input
                 type="text"

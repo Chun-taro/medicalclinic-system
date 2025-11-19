@@ -10,7 +10,9 @@ const initialFormState = {
   phone: '',
   address: '',
   appointmentDate: '',
-  purpose: ''
+  purpose: '',
+  isMedicalCertificate: false,
+  isCheckup: false
 };
 
 export default function BookAppointment() {
@@ -49,7 +51,14 @@ export default function BookAppointment() {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!form.firstName || !form.lastName || !form.email || !form.phone || !form.appointmentDate || !form.purpose) {
+    let purpose = form.purpose;
+    if (form.isMedicalCertificate) {
+      purpose = 'Medical Certificate';
+    } else if (form.isCheckup) {
+      purpose = `Checkup: ${form.purpose}`;
+    }
+
+    if (!form.firstName || !form.lastName || !form.email || !form.phone || !form.appointmentDate || !purpose) {
       alert('Please fill out all required fields.');
       return;
     }
@@ -59,6 +68,7 @@ export default function BookAppointment() {
       const token = localStorage.getItem('token');
       const payload = {
         ...form,
+        purpose,
         appointmentDate: new Date(form.appointmentDate).toISOString()
       };
 
@@ -88,7 +98,15 @@ export default function BookAppointment() {
           <input type="tel" name="phone" placeholder="Your phone" value={form.phone} onChange={handleChange} required />
           <input type="text" name="address" placeholder="Address" value={form.address} onChange={handleChange} />
           <input type="date" name="appointmentDate" placeholder="Pick the date" value={form.appointmentDate} onChange={handleChange} required />
-          <textarea name="purpose" placeholder="Purpose of visit" value={form.purpose} onChange={handleChange} rows={4} required />
+          <div className="checkbox-container">
+            <input type="checkbox" name="isMedicalCertificate" checked={form.isMedicalCertificate} onChange={e => setForm(prev => ({ ...prev, isMedicalCertificate: e.target.checked, purpose: e.target.checked ? 'Medical Certificate' : '', isCheckup: false }))} />
+            <label>Medical Certificate</label>
+          </div>
+          <div className="checkbox-container">
+            <input type="checkbox" name="isCheckup" checked={form.isCheckup} onChange={e => setForm(prev => ({ ...prev, isCheckup: e.target.checked, isMedicalCertificate: false }))} />
+            <label>Checkup Session</label>
+          </div>
+          <textarea name="purpose" placeholder="Purpose of visit" value={form.purpose} onChange={handleChange} rows={4} required disabled={form.isMedicalCertificate} />
           <button type="submit" className="schedule-button" disabled={loading}>
             {loading ? 'Scheduling...' : 'SCHEDULE'}
           </button>

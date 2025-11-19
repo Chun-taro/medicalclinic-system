@@ -8,6 +8,8 @@ export default function ManageUsers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('admin');
+  const [nameSearch, setNameSearch] = useState('');
+  const [idSearch, setIdSearch] = useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -46,15 +48,21 @@ export default function ManageUsers() {
   };
 
   const renderTable = role => {
-    const filtered = users.filter(user => user.role === role);
+    const filtered = users.filter(user => {
+      const matchesRole = role === 'admin' ? user.role !== 'patient' : user.role === role;
+      const matchesName = nameSearch === '' || (user.name || `${user.firstName} ${user.lastName}`).toLowerCase().includes(nameSearch.toLowerCase());
+      const matchesId = idSearch === '' || (user.idNumber && user.idNumber.toString().toLowerCase().includes(idSearch.toLowerCase()));
+      return matchesRole && matchesName && matchesId;
+    });
     return filtered.length === 0 ? (
-      <p>No {role}s found.</p>
+      <p>No {role === 'admin' ? 'staff' : role}s found.</p>
     ) : (
       <table className="user-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>ID Number</th>
             <th>Role</th>
             <th>Change Role</th>
           </tr>
@@ -64,6 +72,7 @@ export default function ManageUsers() {
             <tr key={user._id}>
               <td>{user.name || `${user.firstName} ${user.lastName}`}</td>
               <td>{user.email}</td>
+              <td>{user.idNumber}</td>
               <td>
                 <span
                   className={`role-badge ${
@@ -78,8 +87,11 @@ export default function ManageUsers() {
                   value={user.role}
                   onChange={e => handleRoleChange(user._id, e.target.value)}
                 >
-                  <option value="admin">admin</option>
                   <option value="patient">patient</option>
+                  <option value="admin">admin</option>
+                  <option value="doctor">doctor</option>
+                  <option value="nurse">nurse</option>
+                  <option value="superadmin">superadmin</option>
                 </select>
               </td>
             </tr>
@@ -93,6 +105,22 @@ export default function ManageUsers() {
     <AdminLayout>
       <h2>Manage Users</h2>
       <p>View, edit, or change user roles.</p>
+
+      {/* Search Filters */}
+      <div className="search-filters">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={nameSearch}
+          onChange={(e) => setNameSearch(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Search by ID number..."
+          value={idSearch}
+          onChange={(e) => setIdSearch(e.target.value)}
+        />
+      </div>
 
       {loading ? (
         <p>Loading users...</p>
@@ -120,6 +148,9 @@ export default function ManageUsers() {
           <div className="tab-content">
             {activeTab === 'admin' && renderTable('admin')}
             {activeTab === 'patient' && renderTable('patient')}
+            {activeTab === 'doctor' && renderTable('doctor')}
+            {activeTab === 'nurse' && renderTable('nurse')}
+            {activeTab === 'superadmin' && renderTable('superadmin')}
           </div>
         </>
       )}

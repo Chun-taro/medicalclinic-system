@@ -16,6 +16,7 @@ export default function AllAppointments() {
   const [nameFilter, setNameFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
+  const [purposeFilter, setPurposeFilter] = useState('');
 
   const fetchAppointments = async () => {
     try {
@@ -57,6 +58,12 @@ export default function AllAppointments() {
       const end = new Date(endDateFilter);
       const appDate = new Date(app.appointmentDate);
       if (appDate > new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59)) return false;
+    }
+
+    // Purpose filter
+    if (purposeFilter) {
+      if (purposeFilter === 'checkup' && !app.purpose.startsWith('Checkup:')) return false;
+      if (purposeFilter === 'medical-certificate' && app.purpose !== 'Medical Certificate') return false;
     }
 
     return true;
@@ -139,7 +146,12 @@ export default function AllAppointments() {
           value={endDateFilter}
           onChange={e => setEndDateFilter(e.target.value)}
         />
-        <button onClick={() => { setNameFilter(''); setStartDateFilter(''); setEndDateFilter(''); }}>Clear</button>
+        <select value={purposeFilter} onChange={e => setPurposeFilter(e.target.value)}>
+          <option value="">All Purposes</option>
+          <option value="checkup">Checkup</option>
+          <option value="medical-certificate">Medical Certificate</option>
+        </select>
+        <button onClick={() => { setNameFilter(''); setStartDateFilter(''); setEndDateFilter(''); setPurposeFilter(''); }}>Clear</button>
       </div>
 
      {/* Tab Navigation */}

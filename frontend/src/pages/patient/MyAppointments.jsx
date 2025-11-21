@@ -19,7 +19,7 @@ export default function MyAppointments() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Missing token');
 
-        const res = await axios.get('http://localhost:5000/api/appointments/my', {
+        const res = await axios.get(`${API_BASE_URL}/appointments/my`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -39,7 +39,7 @@ export default function MyAppointments() {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/appointments/${id}`, {
+      await axios.delete(`${API_BASE_URL}/appointments/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAppointments(prev => prev.filter(app => app._id !== id));

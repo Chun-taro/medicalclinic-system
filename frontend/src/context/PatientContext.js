@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import API_BASE_URL from '../api';
 
 const PatientContext = createContext();
 
@@ -15,7 +16,7 @@ export function PatientProvider({ children }) {
       if (!token) return;
 
       try {
-        const res = await fetch('http://localhost:5000/api/profile', {
+        const res = await fetch(`${API_BASE_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

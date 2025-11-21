@@ -489,14 +489,19 @@ const generateReports = async (req, res) => {
   }
 };
 
-//  Get consultations (all with diagnosis)
+//  Get consultations (all with diagnosis or medical certificates)
 const getConsultations = async (req, res) => {
   try {
     // Populate patient basic info (firstName, lastName) from User when available.
-    const consultations = await Appointment.find({ diagnosis: { $ne: null } })
+    const consultations = await Appointment.find({
+      $or: [
+        { diagnosis: { $ne: null } },
+        { purpose: 'Medical Certificate', status: 'completed' }
+      ]
+    })
       .populate('patientId', 'firstName lastName email contactNumber')
       .select(
-        'patientId firstName lastName appointmentDate consultationCompletedAt chiefComplaint diagnosis management bloodPressure temperature heartRate oxygenSaturation bmi bmiIntervention medicinesPrescribed referredToPhysician physicianName firstAidDone firstAidWithin30Mins'
+        'patientId firstName lastName appointmentDate consultationCompletedAt chiefComplaint diagnosis management bloodPressure temperature heartRate oxygenSaturation bmi bmiIntervention medicinesPrescribed referredToPhysician physicianName firstAidDone firstAidWithin30Mins purpose'
       )
       .sort({ consultationCompletedAt: -1 })
       .lean();

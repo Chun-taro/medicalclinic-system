@@ -224,6 +224,14 @@ export default function Reports() {
                       <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
                         <p style={{ fontSize: '1.1rem', fontWeight: 600 }}>ℹ️ No consultation data</p>
                         <p>The admin has not filled in this consultation yet.</p>
+                        {selected.purpose === 'Medical Certificate' && selected.status === 'completed' && (
+                          <div style={{ marginTop: '1rem' }}>
+                            <p style={{ fontSize: '1rem', fontWeight: 600 }}>📄 Medical Certificate</p>
+                            <p>This appointment was completed for medical certificate generation.</p>
+                            <p><strong>Report ID:</strong> {selected._id}</p>
+                            <p><strong>Completed At:</strong> {formatDateTime(selected.consultationCompletedAt || selected.appointmentDate)}</p>
+                          </div>
+                        )}
                       </div>
                     );
                   }

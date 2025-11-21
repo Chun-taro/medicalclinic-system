@@ -290,7 +290,7 @@ export default function Inventory() {
     <th>Medicine</th>
     <th>Quantity</th>
     <th>Dispensed At</th>
-    <th>Source</th> 
+    <th>Source</th>
   </tr>
 </thead>
 <tbody>

@@ -168,10 +168,10 @@ body {
 }
 
 .footer-time {
-  margin-top: 1.5rem;
-  text-align: right;
+  margin-top: 2rem;
+  text-align: center;
   font-size: 0.9rem;
-  color: #636e72;
+  color: #495057;
 }
 
 @media screen and (max-width: 900px) {
@@ -186,5 +186,29 @@ body {
 
   .footer-time {
     text-align: center;
+  }
+}
+
+@media print {
+  @page {
+    margin: 1in;
+  }
+
+  .footer-time {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background: white;
+    padding: 10px;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.8rem;
+    margin: 0 -1in; /* extend to page edges */
+    width: calc(100% + 2in); /* full width */
+  }
+
+  .reports-container {
+    margin-bottom: 80px; /* space for footer */
   }
 }

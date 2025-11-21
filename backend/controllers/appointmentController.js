@@ -665,6 +665,11 @@ const generateCertificatePDF = async (req, res) => {
       return res.status(404).json({ error: 'Patient not found' });
     }
 
+    // Mark appointment as completed when certificate is generated
+    appointment.status = 'completed';
+    appointment.consultationCompletedAt = new Date();
+    await appointment.save();
+
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
@@ -678,6 +683,12 @@ const generateCertificatePDF = async (req, res) => {
             margin: 40px;
             line-height: 1.6;
             color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+          }
+          .content {
+            flex: 1;
           }
           .header {
             text-align: center;
@@ -698,45 +709,54 @@ const generateCertificatePDF = async (req, res) => {
             margin: 20px 0;
             font-size: 16px;
           }
-          .signature-section {
-            margin-top: 60px;
+          .footer {
+            margin-top: auto;
             text-align: left;
+          }
+          .signature-section {
+            margin-bottom: 20px;
           }
           .signature-line {
             border-bottom: 1px solid #000;
             width: 300px;
-            margin-top: 40px;
+            margin-top: 10px;
+            margin-bottom: 10px;
           }
           .date-section {
-            margin-top: 20px;
+            margin-top: 10px;
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>Medical Certificate</h1>
-          <p>Medical Center Name</p>
-          <p>Address Line 1</p>
-          <p>City, State, ZIP Code</p>
-          <p>Phone: (123) 456-7890</p>
+        <div class="content">
+          <div class="header">
+            <h1>Medical Certificate</h1>
+            <p>Medical Center Name</p>
+            <p>Address Line 1</p>
+            <p>City, State, ZIP Code</p>
+            <p>Phone: (123) 456-7890</p>
+          </div>
+
+          <div class="certificate-content">
+            <p>This is to certify that</p>
+            <p><strong>${patient.firstName} ${patient.lastName}</strong></p>
+            <p>has been examined and is found to be in good health and fit for work/school.</p>
+            <p>The examination was conducted on <strong>${new Date().toLocaleDateString()}</strong>.</p>
+            <p><strong>Report ID:</strong> ${appointment._id}</p>
+          </div>
         </div>
 
-        <div class="certificate-content">
-          <p>This is to certify that</p>
-          <p><strong>${patient.firstName} ${patient.lastName}</strong></p>
-          <p>has been examined and is found to be in good health and fit for work/school.</p>
-          <p>The examination was conducted on <strong>${new Date().toLocaleDateString()}</strong>.</p>
-        </div>
+        <div class="footer">
+          <div class="signature-section">
+            <p>Doctor's Signature:</p>
+            <div class="signature-line"></div>
+            <p>Dr. [Doctor's Name]</p>
+            <p>License Number: [License #]</p>
+          </div>
 
-        <div class="signature-section">
-          <p>Doctor's Signature:</p>
-          <div class="signature-line"></div>
-          <p>Dr. [Doctor's Name]</p>
-          <p>License Number: [License #]</p>
-        </div>
-
-        <div class="date-section">
-          <p>Date: ${new Date().toLocaleDateString()}</p>
+          <div class="date-section">
+            <p>Date: ${new Date().toLocaleDateString()}</p>
+          </div>
         </div>
       </body>
       </html>

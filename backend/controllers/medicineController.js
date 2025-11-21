@@ -252,9 +252,10 @@ const generateDispenseHistoryPDF = async (req, res) => {
   try {
     const { startDate, endDate, medicineName } = req.query;
 
-    // Check if any filters are applied
     if (!startDate && !endDate && !medicineName) {
-      return res.status(400).json({ error: 'Please apply at least one filter (start date, end date, or medicine name) to generate the dispense history report.' });
+      return res.status(400).json({
+        error: 'Please apply at least one filter (start date, end date, or medicine name) to generate the dispense history report.'
+      });
     }
 
     const medicines = await Medicine.find({}, 'name dispenseHistory')
@@ -294,13 +295,15 @@ const generateDispenseHistoryPDF = async (req, res) => {
       });
     });
 
-    // Sort by dispensedAt descending
     allHistory.sort((a, b) => new Date(b.dispensedAt) - new Date(a.dispensedAt));
+    const reportId = `RPT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
-    // Create PDF
-    const doc = new PDFDocument();
+    const PDFDocument = require('pdfkit');
+    const crypto = require('crypto');
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
     const buffers = [];
-    doc.on('data', (chunk) => buffers.push(chunk));
+
+    doc.on('data', chunk => buffers.push(chunk));
     doc.on('end', () => {
       const pdfBuffer = Buffer.concat(buffers);
       res.setHeader('Content-Type', 'application/pdf');
@@ -308,13 +311,57 @@ const generateDispenseHistoryPDF = async (req, res) => {
       res.send(pdfBuffer);
     });
 
-    // Add header for first page
+    // Footer helper
+    const drawFooter = (pageNumber, totalPages, isLastPage = false) => {
+      const pageHeight = doc.page.height;
+      const pageWidth = doc.page.width;
+      const footerY = pageHeight - 150;
+      const signatureBlockWidth = 300;
+      const signatureLeft = (pageWidth - signatureBlockWidth) / 2;
+
+      doc.lineWidth(1).moveTo(50, footerY).lineTo(pageWidth - 50, footerY).stroke();
+
+      doc.fontSize(7);
+      doc.text('Medical System - Dispense History Report', 50, footerY + 10, { align: 'left' });
+      doc.text('This report is generated electronically.', pageWidth - 150, footerY + 10, {
+        width: 100,
+        align: 'right'
+      });
+      doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth / 2 - 50, footerY + 10, {
+        width: 100,
+        align: 'center'
+      });
+
+      if (isLastPage) {
+        const uniqueSignatureId = crypto.randomUUID();
+        doc.fontSize(6);
+        doc.text('Digital Signature:', signatureLeft, footerY + 25, {
+          width: signatureBlockWidth,
+          align: 'center'
+        });
+        doc.lineWidth(1)
+          .moveTo(signatureLeft, footerY + 30)
+          .lineTo(signatureLeft + signatureBlockWidth, footerY + 30)
+          .stroke();
+        doc.text(`ID: ${uniqueSignatureId}`, signatureLeft, footerY + 35, {
+          width: signatureBlockWidth,
+          align: 'center'
+        });
+        doc.text('Validated by Medical System on ' + new Date().toLocaleDateString(), signatureLeft, footerY + 43, {
+          width: signatureBlockWidth,
+          align: 'center'
+        });
+      }
+    };
+
+    // Header
     doc.fontSize(20).text('Medical System - Dispense History Report', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).text(`Report ID: ${reportId}`, { align: 'center' });
     doc.moveDown();
     doc.fontSize(12).text(`Generated on: ${new Date().toLocaleString()}`, { align: 'center' });
     doc.moveDown();
 
-    // Filters (only on first page)
     if (startDate || endDate || medicineName) {
       doc.fontSize(10).text('Filters Applied:', { underline: true });
       if (startDate) doc.text(`From: ${new Date(startDate).toLocaleDateString()}`);
@@ -323,36 +370,38 @@ const generateDispenseHistoryPDF = async (req, res) => {
       doc.moveDown();
     }
 
+    // Table
+    let pageCount = 1;
+    const renderTableHeader = () => {
+      doc.fontSize(10);
+      doc.text('Medicine', 50, doc.y);
+      doc.text('Quantity', 150, doc.y);
+      doc.text('Dispensed', 220, doc.y);
+      doc.text('Source', 350, doc.y);
+      doc.moveTo(50, doc.y + 15).lineTo(550, doc.y + 15).stroke();
+    };
+
     if (allHistory.length === 0) {
       doc.fontSize(14).text('No dispense history records found for the applied filters.', { align: 'center' });
+      drawFooter(pageCount, pageCount, true);
     } else {
-      // Table header
-      const tableTop = doc.y;
-      doc.fontSize(10);
-      doc.text('Medicine', 50, tableTop);
-      doc.text('Quantity', 150, tableTop);
-      doc.text('Dispensed', 220, tableTop);
-      doc.text('Source', 350, tableTop);
+      renderTableHeader();
+      let y = doc.y + 25;
+      const footerReserve = 100;
 
-      doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-      let y = tableTop + 25;
-      allHistory.forEach(record => {
-        if (y > 600) { // New page if needed, leaving more space for footer
+      allHistory.forEach((record, index) => {
+        if (y + 20 > doc.page.height - footerReserve) {
+          drawFooter(pageCount, '...');
           doc.addPage();
-          // Add header for new page (smaller font to fit)
+          pageCount++;
           doc.fontSize(16).text('Medical System - Dispense History Report', { align: 'center' });
+          doc.moveDown();
+          doc.fontSize(10).text(`Report ID: ${reportId}`, { align: 'center' });
           doc.moveDown();
           doc.fontSize(10).text(`Generated on: ${new Date().toLocaleString()}`, { align: 'center' });
           doc.moveDown();
-          // Add table header on new page
-          doc.fontSize(10);
-          doc.text('Medicine', 50, doc.y);
-          doc.text('Quantity', 150, doc.y);
-          doc.text('Dispensed', 220, doc.y);
-          doc.text('Source', 350, doc.y);
-          doc.moveTo(50, doc.y + 15).lineTo(550, doc.y + 15).stroke();
-          y = doc.y + 25; // Start table after header
+          renderTableHeader();
+          y = doc.y + 25;
         }
 
         doc.text(record.medicineName, 50, y);
@@ -361,55 +410,18 @@ const generateDispenseHistoryPDF = async (req, res) => {
         doc.text(record.source, 350, y);
         doc.moveTo(50, y + 15).lineTo(550, y + 15).stroke();
         y += 20;
-      });
 
+        if (index === allHistory.length - 1) {
+          drawFooter(pageCount, pageCount, true);
+        }
+      });
     }
 
     doc.end();
-
-    // Add footer and digital signature to all pages
-    const totalPages = doc.pageNumber;
-    for (let i = 0; i < totalPages; i++) {
-      doc.switchToPage(i);
-      // Add footer at the bottom
-      doc.fontSize(10);
-      doc.text('Medical System - Dispense History Report', 50, doc.page.height - 100, { align: 'left' });
-      doc.text('This report is generated electronically.', doc.page.width - 50, doc.page.height - 90, { align: 'right' });
-      doc.text(`Page ${i + 1} of ${totalPages}`, doc.page.width / 2, doc.page.height - 80, { align: 'center' });
-      // Add digital signature to all pages
-      doc.text('Digital Signature:', doc.page.width - 50, doc.page.height - 65, { align: 'right' });
-      doc.lineWidth(3).moveTo(doc.page.width - 200, doc.page.height - 60).lineTo(doc.page.width - 50, doc.page.height - 60).stroke();
-      doc.text('Validated by Medical System on ' + new Date().toLocaleDateString(), doc.page.width - 50, doc.page.height - 55, { align: 'right' });
-    }
-
   } catch (err) {
     console.error('PDF generation error:', err.message);
     res.status(500).json({ error: 'Failed to generate PDF' });
   }
-
-
-
-
-
-
-  // Add footer and digital signature to all pages BEFORE ending the document
-const totalPages = doc.bufferedPageRange().count;
-for (let i = 0; i < totalPages; i++) {
-  doc.switchToPage(i);
-  const pageHeight = doc.page.height;
-  const pageWidth = doc.page.width;
-
-  doc.fontSize(10);
-  doc.text('Medical System - Dispense History Report', 50, pageHeight - 100, { align: 'left' });
-  doc.text('This report is generated electronically.', pageWidth - 50, pageHeight - 90, { align: 'right' });
-  doc.text(`Page ${i + 1} of ${totalPages}`, pageWidth / 2, pageHeight - 80, { align: 'center' });
-
-  doc.text('Digital Signature:', pageWidth - 50, pageHeight - 65, { align: 'right' });
-  doc.lineWidth(3).moveTo(pageWidth - 200, pageHeight - 60).lineTo(pageWidth - 50, pageHeight - 60).stroke();
-  doc.text('Validated by Medical System on ' + new Date().toLocaleDateString(), pageWidth - 50, pageHeight - 55, { align: 'right' });
-}
-
-doc.end(); // Finalize after all pages are updated
 };
 
 module.exports = {

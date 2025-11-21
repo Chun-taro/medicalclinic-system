@@ -237,6 +237,9 @@ export default function Reports() {
                         {firstName} {lastName}
                       </h4>
                       <p>
+                        <strong>Report ID:</strong> {selected._id}
+                      </p>
+                      <p>
                         <strong>Diagnosis:</strong> {selected.diagnosis}
                       </p>
                       <p>

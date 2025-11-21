@@ -10,6 +10,7 @@
 .appointment-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 800px; /* Ensure table doesn't shrink too much */
 }
 
 .appointment-table th,
@@ -18,16 +19,66 @@
   text-align: left;
   font-size: 0.95rem;
   border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .appointment-table th {
   background-color: #f1f5f9;
   font-weight: 600;
   color: #475569;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .appointment-table tr:hover {
   background-color: #f9fafb;
+}
+
+/* Make Name column wider */
+.appointment-table th:nth-child(1),
+.appointment-table td:nth-child(1) {
+  min-width: 200px;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Make Date column fixed width */
+.appointment-table th:nth-child(2),
+.appointment-table td:nth-child(2) {
+  width: 120px;
+}
+
+/* Make Email and Phone narrower */
+.appointment-table th:nth-child(3),
+.appointment-table td:nth-child(3),
+.appointment-table th:nth-child(4),
+.appointment-table td:nth-child(4) {
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Purpose column */
+.appointment-table th:nth-child(5),
+.appointment-table td:nth-child(5) {
+  min-width: 150px;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status column */
+.appointment-table th:nth-child(6),
+.appointment-table td:nth-child(6) {
+  width: 100px;
+}
+
+/* Actions column */
+.appointment-table th:nth-child(7),
+.appointment-table td:nth-child(7) {
+  width: 120px;
 }
 
 .status-tag {

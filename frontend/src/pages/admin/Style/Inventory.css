@@ -1,21 +1,24 @@
-/* Container */
+/* ────────────────────────────────
+   Inventory Container
+────────────────────────────────── */
 .inventory-container {
-  padding: 20px;
+  padding: var(--spacing-lg);
   max-width: 1200px;
-  margin: auto;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  margin: 0 auto;
+  color: var(--text-color);
+  background-color: var(--bg-color);
 }
 
 /* Headings */
 .inventory-container h2 {
-  font-size: 1.8rem;
-  margin-bottom: 4px;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-color);
 }
 
 .inventory-container p {
-  margin-bottom: 20px;
-  color: #555;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-light);
 }
 
 /* Shared sizing for form controls to align uniformly */
@@ -25,34 +28,50 @@
 .dispense-form input,
 .dispense-form button {
   box-sizing: border-box;
-  height: 40px;            
-  padding: 0 12px;         
-  font-size: 0.95rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  height: 40px;
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font-family);
+}
+
+.medicine-form input:focus,
+.dispense-form select:focus,
+.dispense-form input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.15);
+  outline: none;
 }
 
 /* Form Styling (Add Medicine) */
 .medicine-form {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-  align-items: end;        
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  align-items: end;
+  background-color: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .medicine-form button {
-  background-color: #0077cc;
+  background-color: var(--primary-color);
   color: #fff;
   font-weight: 600;
   border: none;
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .medicine-form button:disabled {
-  background-color: #88c0e0;
+  background-color: var(--text-muted);
   cursor: not-allowed;
+  transform: none;
 }
 
 .medicine-form button:hover:not(:disabled) {
@@ -60,46 +79,47 @@
   transform: scale(1.02);
 }
 
-.medicine-form input:focus {
-  border-color: #0077cc;
-  box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.15);
-  outline: none;
-}
-
 .dispense-form {
   display: flex;
-  gap: 12px;
-  margin-bottom: 25px;
-  align-items: center;        
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  align-items: center;
+  background-color: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .dispense-form select,
 .dispense-form input,
 .dispense-form button {
-  box-sizing: border-box;     
-  margin: 0;                   
-  height: 38px;                
-  padding: 0 12px;             
-  font-size: 0.95rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  display: flex;               
-  align-items: center;         
+  box-sizing: border-box;
+  margin: 0;
+  height: 38px;
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  font-family: var(--font-family);
 }
 
 .dispense-form input {
-  width: 110px;                
-  flex: none;                  
+  width: 110px;
+  flex: none;
 }
 
 .dispense-form button {
-  width: auto;                 
-  justify-content: center;     
-  background-color: #28a745;
+  width: auto;
+  justify-content: center;
+  background-color: var(--secondary-color);
   color: #fff;
   font-weight: 600;
   border: none;
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .dispense-form button:hover {
@@ -194,6 +214,9 @@
   }
 }
 
+/* ────────────────────────────────
+   Popups and Modals
+────────────────────────────────── */
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -208,22 +231,30 @@
 }
 
 .popup {
-  background: #fff;
-  padding: 20px 30px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  background: white;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-hover);
   text-align: center;
   animation: fadeIn 0.3s ease-in-out;
+  max-width: 400px;
+  width: 90%;
 }
 
 .popup button {
-  margin-top: 10px;
-  padding: 6px 12px;
-  background: #007bff;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius);
   cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease;
+}
+
+.popup button:hover {
+  background: #005fa3;
 }
 
 @keyframes fadeIn {
@@ -246,42 +277,59 @@
 
 .modal-content {
   background: white;
-  padding: 20px;
+  padding: var(--spacing-lg);
   width: 90%;
   max-width: 900px;
   max-height: 80vh;
   overflow-y: auto;
-  border-radius: 8px;
+  border-radius: var(--border-radius-large);
   position: relative;
+  box-shadow: var(--shadow-hover);
 }
 
 .close-btn {
   position: absolute;
-  top: 10px;
-  right: 15px;
-  background: #dc3545;
+  top: var(--spacing-sm);
+  right: var(--spacing-md);
+  background: var(--danger-color);
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius);
   cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #cc0000;
 }
 
 .table-wrapper {
   overflow-x: auto;
-  margin-top: 20px;
+  margin-top: var(--spacing-lg);
 }
 
 .history-table {
   width: 100%;
   border-collapse: collapse;
+  background-color: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .history-table th,
 .history-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-sm);
   text-align: left;
+  font-size: var(--font-size-sm);
+}
+
+.history-table th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
 }
 
 /* Column widths for clarity */

@@ -224,10 +224,10 @@ export default function AllAppointments() {
                   <tbody>
   {filteredAppointments.filter(app => app.status === 'pending').map(app => (
     <tr key={app._id}>
-      <td>{app.patientId?.firstName} {app.patientId?.lastName}</td>
+      <td>{app.patientId?.firstName || app.firstName || 'N/A'} {app.patientId?.lastName || app.lastName || ''}</td>
       <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
-      <td>{app.patientId?.email}</td>
-      <td>{app.patientId?.contactNumber}</td>
+      <td>{app.patientId?.email || app.email || 'N/A'}</td>
+      <td>{app.patientId?.contactNumber || app.phone || 'N/A'}</td>
       <td>{app.purpose}</td>
       <td><span className="status-tag pending">Pending</span></td>
       <td className="action-cell">
@@ -262,10 +262,10 @@ export default function AllAppointments() {
                   <tbody>
   {filteredAppointments.filter(app => app.status === 'approved').map(app => (
     <tr key={app._id}>
-      <td>{app.patientId?.firstName} {app.patientId?.lastName}</td>
+      <td>{app.patientId?.firstName || app.firstName || 'N/A'} {app.patientId?.lastName || app.lastName || ''}</td>
       <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
-      <td>{app.patientId?.email}</td>
-      <td>{app.patientId?.contactNumber}</td>
+      <td>{app.patientId?.email || app.email || 'N/A'}</td>
+      <td>{app.patientId?.contactNumber || app.phone || 'N/A'}</td>
       <td>{app.purpose}</td>
       <td><span className="status-tag confirmed">Approved</span></td>
       <td className="action-cell">

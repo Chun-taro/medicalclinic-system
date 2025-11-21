@@ -220,6 +220,9 @@ export default function AdminLayout({ children }) {
           </div>
         </nav>
 
+        <header className="page-header">
+          <h1>Admin Dashboard</h1>
+        </header>
         <section className="page-content">{children}</section>
       </main>
     </div>

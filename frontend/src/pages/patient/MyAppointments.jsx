@@ -8,6 +8,11 @@ export default function MyAppointments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const firstName = localStorage.getItem('firstName') || 'N/A';
+  const lastName = localStorage.getItem('lastName') || '';
+  const email = localStorage.getItem('email') || 'N/A';
+  const phone = localStorage.getItem('contactNumber') || 'N/A';
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -73,9 +78,9 @@ export default function MyAppointments() {
               <tbody>
                 {appointments.map(app => (
                   <tr key={app._id}>
-                    <td>{app.patientId?.firstName} {app.patientId?.lastName}</td>
-                    <td>{app.patientId?.email || '—'}</td>
-                    <td>{app.patientId?.contactNumber || '—'}</td>
+                    <td>{firstName} {lastName}</td>
+                    <td>{email}</td>
+                    <td>{phone}</td>
                     <td>{app.purpose || '—'}</td>
                     <td>{new Date(app.appointmentDate).toLocaleDateString()}</td>
                     <td>{app.status}</td>
